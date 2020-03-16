@@ -34,6 +34,7 @@ public class NPCLibrary {
       return;
     }
 
+    plugin = pl;
     LISTENER = new NPCListeners();
     Bukkit.getServer().getPluginManager().registerEvents(LISTENER, pl);
   }

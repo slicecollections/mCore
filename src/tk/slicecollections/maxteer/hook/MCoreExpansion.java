@@ -47,7 +47,7 @@ public class MCoreExpansion extends PlaceholderExpansion {
       return "§cOFF";
     } else if (params.equals("status_jogadores_inksack")) {
       return profile.getPreferencesContainer().getPlayerVisibility().getInkSack();
-    }else if (params.startsWith("SkyWars_")) {
+    } else if (params.startsWith("SkyWars_")) {
       String table = "mCoreSkyWars";
       String value = params.replace("SkyWars_", "");
       if (value.equals("kills") || value.equals("deaths") || value.equals("assists") || value.equals("games") || value.equals("wins")) {
