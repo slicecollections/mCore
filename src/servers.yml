@@ -1,0 +1,28 @@
+# Título do menu
+title: 'Modos de Jogo'
+# Colunas do menu
+rows: 3
+# Slots que mesmo com servidores não iram redirecionar
+# útil para caso você já esteja num servidor do minigame
+disabled-slots: [10]
+items:
+ lobby:
+  slot: 10
+  icon: 'BOOKSHELF : 1 : nome>&6Lobby Principal : desc>&eClique para entrar!'
+  # Quantidade maxima de jogadores por lobby.
+  max-players: 50
+  # Nome dos servidores na config.yml do BungeeCord
+  servernames:
+  - lobby
+ skywars:
+  slot: 12
+  icon: 'GRASS : 1 : nome>&aSky Wars : desc>\n  &7Você tem medo de altura? Então este\n  &7jogo não é para você! No Sky Wars, você\n  &7deverá eliminar os seus adversários com\n  &7a ajuda dos diversos Kits e Habilidades.\n \n  &7▪ &fSolo\n  &7▪ &fDupla\n \n&eClique para jogar!\n&7{players} jogando.'
+  max-players: 50
+  servernames:
+  - skywars
+ thebridge:
+  slot: 13
+  icon: 'STAINED_CLAY:11 : 1 : nome>&aThe Bridge : desc>\n  &7Prepare-se para balancear muito bem sua defesa\n  &7com seu ataque! Neste minigame você deve ser o\n  &7mais rápido para alcançar a base do seu inimigo\n  &7e marcar um ponto antes dele!\n \n  &7▪ &f1v1\n  &7▪ &f2v2\n \n&eClique para jogar!\n&7{players} jogando.'
+  max-players: 50
+  servernames:
+  - thebridge

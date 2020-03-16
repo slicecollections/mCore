@@ -1,0 +1,14 @@
+database:
+ # Tipos de bancos de dados disponíveis atualmente: MySQL, SQLite
+ tipo: 'MySQL'
+ mysql:
+  # Host para acessar o MySQL
+  host: 'localhost'
+  # Porta para acessar o MySQL
+  porta: '3306'
+  # Nome do banco de dados no MySQL
+  nome: 'server'
+  # Usuário de acesso ao MySQL
+  usuario: 'root'
+  # Senha de acesso ao MySQL
+  senha: ''
