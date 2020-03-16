@@ -31,6 +31,6 @@ public abstract class Commands extends Command {
   }
   
   public static void setupCommands() {
-    new ProfileCommand();
+    
   }
 }
