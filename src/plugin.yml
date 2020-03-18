@@ -1,6 +1,6 @@
 author: Maxteer
 name: mCore
-version: 1.0.0
+version: 1.1
 depend: [ProtocolLib, PlaceholderAPI]
 
 main: tk.slicecollections.maxteer.Core

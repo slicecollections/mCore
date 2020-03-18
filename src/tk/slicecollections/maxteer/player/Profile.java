@@ -1,5 +1,6 @@
 package tk.slicecollections.maxteer.player;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +103,9 @@ public class Profile {
   }
 
   public void refreshPlayers() {
-    this.hotbar.apply(this);
+    if (this.hotbar != null) {
+      this.hotbar.apply(this);
+    }
 
     if (!this.playingGame()) {
       Player player = this.getPlayer();
@@ -198,15 +201,44 @@ public class Profile {
   }
 
   public List<Profile> getLastHitters() {
-    return this.lastHit.entrySet().stream()
+    List<Profile> hitters = this.lastHit.entrySet().stream()
         .filter(entry -> isOnline(entry.getKey()))
         .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-        .map(entry -> getProfile(entry.getKey()))
-        .collect(Collectors.toList());
+        .map(entry -> getProfile(entry.getKey())).collect(Collectors.toList());
+    //limpar após uso
+    this.lastHit.clear();
+    return hitters;
   }
 
   public MScoreboard getScoreboard() {
     return this.scoreboard;
+  }
+
+  public void addStats(String table, String... keys) {
+    this.addStats(table, 1, keys);
+  }
+
+  public void addStats(String table, long amount, String... keys) {
+    for (String key : keys) {
+      this.getDataContainer(table, key).addLong(amount);
+    }
+  }
+
+  public void setStats(String table, long amount, String... keys) {
+    for (String key : keys) {
+      this.getDataContainer(table, key).set(amount);
+    }
+  }
+
+  public void updateDailyStats(String table, String date, long amount, String... keys) {
+    long currentExpire = this.getStats(table, date);
+    this.setStats(table, System.currentTimeMillis(), date);
+    if (amount == 0 || !COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire))) {
+      this.setStats(table, 0, keys);
+      return;
+    }
+
+    this.addStats(table, amount, keys);
   }
 
   public int addCoins(String table, double amount) {
@@ -249,6 +281,17 @@ public class Profile {
     return stat;
   }
 
+  // Resetar diariamente baseado em um Timemillis.
+  public long getDailyStats(String table, String date, String... keys) {
+    long currentExpire = this.getStats(table, date);
+    if (!COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire))) {
+      this.setStats(table, 0, keys);
+    }
+
+    this.setStats(table, System.currentTimeMillis(), date);
+    return this.getStats(table, keys);
+  }
+
   public double getCoins(String table) {
     return this.getDataContainer(table, "coins").getAsDouble();
   }
@@ -289,20 +332,21 @@ public class Profile {
     return this.getDataContainer(table, key).getContainer(containerClass);
   }
 
-  private static Map<String, Profile> profiles = new HashMap<>();
+  private static final Map<String, Profile> PROFILES = new HashMap<>();
+  private static final SimpleDateFormat COMPARE_SDF = new SimpleDateFormat("yyyy/MM/dd");
 
   public static Profile createOrLoadProfile(String playerName) {
-    Profile profile = profiles.get(playerName.toLowerCase());
+    Profile profile = PROFILES.get(playerName.toLowerCase());
     if (profile == null) {
       profile = new Profile(playerName);
-      profiles.put(playerName.toLowerCase(), profile);
+      PROFILES.put(playerName.toLowerCase(), profile);
     }
 
     return profile;
   }
 
   public static Profile loadIfExists(String playerName) {
-    Profile profile = profiles.get(playerName.toLowerCase());
+    Profile profile = PROFILES.get(playerName.toLowerCase());
     if (profile == null) {
       playerName = Database.getInstance().exists(playerName);
       if (playerName != null) {
@@ -314,18 +358,18 @@ public class Profile {
   }
 
   public static Profile getProfile(String playerName) {
-    return profiles.get(playerName.toLowerCase());
+    return PROFILES.get(playerName.toLowerCase());
   }
 
   public static Profile unloadProfile(String playerName) {
-    return profiles.remove(playerName.toLowerCase());
+    return PROFILES.remove(playerName.toLowerCase());
   }
 
   public static boolean isOnline(String playerName) {
-    return profiles.containsKey(playerName.toLowerCase());
+    return PROFILES.containsKey(playerName.toLowerCase());
   }
 
   public static Collection<Profile> listProfiles() {
-    return profiles.values();
+    return PROFILES.values();
   }
 }

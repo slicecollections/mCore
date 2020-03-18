@@ -1,5 +1,5 @@
 database:
- # Tipos de bancos de dados disponíveis atualmente: MySQL, SQLite
+ # Tipos de bancos de dados disponíveis atualmente: MySQL
  tipo: 'MySQL'
  mysql:
   # Host para acessar o MySQL
