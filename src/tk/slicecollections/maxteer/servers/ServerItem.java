@@ -21,11 +21,13 @@ import tk.slicecollections.maxteer.servers.balancer.type.MostConnection;
 
 public class ServerItem {
 
+  private String key;
   private int slot;
   private String icon;
   private BaseBalancer<Server> balancer;
 
-  public ServerItem(int slot, String icon, BaseBalancer<Server> baseBalancer) {
+  public ServerItem(String key, int slot, String icon, BaseBalancer<Server> baseBalancer) {
+    this.key = key;
     this.slot = slot;
     this.icon = icon;
     this.balancer = baseBalancer;
@@ -37,6 +39,10 @@ public class ServerItem {
     if (server != null) {
       Core.sendServer(profile, server.getName());
     }
+  }
+
+  public String getKey() {
+    return this.key;
   }
 
   public int getSlot() {
@@ -58,8 +64,8 @@ public class ServerItem {
 
   public static void setupServers() {
     for (String key : CONFIG.getSection("items").getKeys(false)) {
-      ServerItem si = new ServerItem(CONFIG.getInt("items." + key + ".slot"), CONFIG.getString("items." + key + ".icon"),
-          key.equalsIgnoreCase("lobby") ? new MostConnection<>() : new LeastConnection<>());
+      ServerItem si = new ServerItem(key, CONFIG.getInt("items." + key + ".slot"), CONFIG.getString("items." + key + ".icon"),
+          key.equalsIgnoreCase("lobby") ? new LeastConnection<>() : new MostConnection<>());
       SERVERS.add(si);
       CONFIG.getStringList("items." + key + ".servernames").forEach(server -> {
         si.getBalancer().add(server, new Server(server, CONFIG.getInt("items." + key + ".max-players")));
@@ -76,6 +82,10 @@ public class ServerItem {
 
   public static Collection<ServerItem> listServers() {
     return SERVERS;
+  }
+
+  public static ServerItem getServerItem(String key) {
+    return SERVERS.stream().filter(si -> si.getKey().equals(key)).findFirst().orElse(null);
   }
 
   public static boolean alreadyQuerying(String servername) {

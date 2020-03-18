@@ -5,6 +5,8 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.player.enums.PlayerVisibility;
+import tk.slicecollections.maxteer.player.role.Role;
+import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
 @SuppressWarnings("all")
@@ -37,7 +39,25 @@ public class MCoreExpansion extends PlaceholderExpansion {
       return "";
     }
 
-    if (params.equals("status_jogadores")) {
+    if (params.startsWith("online")) {
+      if (params.contains("online_")) {
+        String server = params.replace("online_", "");
+        ServerItem si = ServerItem.getServerItem(server);
+        if (si != null) {
+          return StringUtils.formatNumber(si.getBalancer().getTotalNumber());
+        }
+        
+        return "entry invalida";
+      }
+      
+      long online = 0;
+      for (ServerItem si : ServerItem.listServers()) {
+        online += si.getBalancer().getTotalNumber();
+      }
+      return StringUtils.formatNumber(online);
+    } else if (params.equals("role")) {
+      return Role.getPlayerRole(player).getName();
+    } else if (params.equals("status_jogadores")) {
       return profile.getPreferencesContainer().getPlayerVisibility().getName();
     } else if (params.equals("status_jogadores_nome")) {
       if (profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS) {

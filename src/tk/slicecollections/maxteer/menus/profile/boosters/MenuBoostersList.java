@@ -56,6 +56,11 @@ public class MenuBoostersList<T extends Achievement> extends PagedPlayerMenu {
               Booster booster = this.boosters.get(item);
               if (booster != null) {
                 if (type == BoosterType.NETWORK) {
+                  if (!Core.minigames.contains(Core.minigame)) {
+                    this.player.sendMessage("§cVocê precisa estar em um servidor de Minigame para ativar esse Multiplicador.");
+                    return;
+                  }
+                  
                   if (!Booster.setNetworkBooster(Core.minigame, profile, booster)) {
                     EnumSound.ENDERMAN_TELEPORT.play(this.player, 0.5F, 1.0F);
                     this.player.sendMessage("§cJá existe um Multiplicador Geral para o " + Core.minigame + " ativo.");
