@@ -17,6 +17,7 @@ import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.container.AchievementsContainer;
 import tk.slicecollections.maxteer.database.data.container.BoostersContainer;
+import tk.slicecollections.maxteer.database.data.container.DeliveriesContainer;
 import tk.slicecollections.maxteer.database.data.container.PreferencesContainer;
 import tk.slicecollections.maxteer.database.data.container.SelectedContainer;
 import tk.slicecollections.maxteer.database.data.container.TitlesContainer;
@@ -230,15 +231,15 @@ public class Profile {
     }
   }
 
-  public void updateDailyStats(String table, String date, long amount, String... keys) {
+  public void updateDailyStats(String table, String date, long amount, String key) {
     long currentExpire = this.getStats(table, date);
     this.setStats(table, System.currentTimeMillis(), date);
-    if (amount == 0 || !COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire))) {
-      this.setStats(table, 0, keys);
+    if ((amount == 0 || this.getStats(table, key) > 0) && (!COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire)))) {
+      this.setStats(table, 0, key);
       return;
     }
 
-    this.addStats(table, amount, keys);
+    this.addStats(table, amount, key);
   }
 
   public int addCoins(String table, double amount) {
@@ -282,14 +283,14 @@ public class Profile {
   }
 
   // Resetar diariamente baseado em um Timemillis.
-  public long getDailyStats(String table, String date, String... keys) {
+  public long getDailyStats(String table, String date, String key) {
     long currentExpire = this.getStats(table, date);
     if (!COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire))) {
-      this.setStats(table, 0, keys);
+      this.setStats(table, 0, key);
     }
 
     this.setStats(table, System.currentTimeMillis(), date);
-    return this.getStats(table, keys);
+    return this.getStats(table, key);
   }
 
   public double getCoins(String table) {
@@ -304,6 +305,10 @@ public class Profile {
     return StringUtils.formatNumber(this.getDataContainer(table, key).getAsDouble());
   }
 
+  public DeliveriesContainer getDeliveriesContainer() {
+    return this.getAbstractContainer("mCoreProfile", "deliveries", DeliveriesContainer.class);
+  }
+  
   public PreferencesContainer getPreferencesContainer() {
     return this.getAbstractContainer("mCoreProfile", "preferences", PreferencesContainer.class);
   }

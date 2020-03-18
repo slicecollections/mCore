@@ -37,11 +37,19 @@ public class TimeUtils {
   }
   
   public static String getTimeUntil(long epoch) {
+    return getTimeUntil(epoch, true);
+  }
+  
+  public static String getTimeUntil(long epoch, boolean seconds) {
     epoch -= System.currentTimeMillis();
-    return getTime(epoch);
+    return getTime(epoch, seconds);
+  }
+  
+  public static String getTime(long time) {
+    return getTime(time, true);
   }
 
-  public static String getTime(long time) {
+  public static String getTime(long time, boolean seconds) {
     long ms = time / 1000;
     if (ms <= 0) {
       return "";
@@ -50,24 +58,32 @@ public class TimeUtils {
     StringBuilder result = new StringBuilder();
     long days = ms / 86400;
     if (days > 0) {
-      result.append(days + " " + (days > 1 ? "dias" : "dia"));
+      result.append(days + "d");
       ms -= days * 86400;
       if (ms / 3600 > 0) {
-        result.append(", ");
+        result.append(" ");
       }
     }
     long hours = ms / 3600;
     if (hours > 0) {
-      result.append(hours + " " + (hours > 1 ? "horas" : "hora"));
+      result.append(hours + "h");
       ms -= hours * 3600;
       if (ms / 60 > 0) {
-        result.append(", ");
+        result.append(" ");
       }
     }
     long minutes = ms / 60;
     if (minutes > 0) {
-      result.append(minutes + " " + (minutes > 1 ? "minutos" : "minuto"));
+      result.append(minutes + "m");
       ms -= minutes * 60;
+      if (ms > 0 && seconds) {
+        result.append(" ");
+      }
+    }
+    if (seconds) {
+      if (ms > 0) {
+        result.append(ms + "s");
+      }
     }
 
     return result.toString();

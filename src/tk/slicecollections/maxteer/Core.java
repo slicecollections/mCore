@@ -14,6 +14,7 @@ import tk.slicecollections.maxteer.achievements.Achievement;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.cmd.Commands;
 import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.deliveries.Delivery;
 import tk.slicecollections.maxteer.hook.MCoreExpansion;
 import tk.slicecollections.maxteer.libraries.MinecraftVersion;
 import tk.slicecollections.maxteer.libraries.holograms.HologramLibrary;
@@ -61,6 +62,7 @@ public class Core extends MPlugin implements PluginMessageListener {
     Role.setupRoles();
     Title.setupTitles();
     Booster.setupBoosters();
+    Delivery.setupDeliveries();
     ServerItem.setupServers();
     Achievement.setupAchievements();
 

@@ -14,9 +14,9 @@ public class Booster {
   private double multiplier;
   private long hours;
 
-  public Booster(double multiplier, long days) {
+  public Booster(double multiplier, long hours) {
     this.multiplier = multiplier;
-    this.hours = days;
+    this.hours = hours;
   }
 
   public void gc() {

@@ -1,0 +1,70 @@
+# Prêmios:
+# COMANDO:comando ({name} = jogador)
+# SKYWARS_COINS>quantia
+# THEBRIDGE_COINS>quantia
+# PRIVATE_BOOSTER>quantia:multiplicador:horas
+# NETWORK_BOOSTER>quantia:multiplicador:horas
+deliveries:
+ cmembro:
+  slot: 11
+  days: 30
+  permission: ''
+  icon: 'STORAGE_MINECART : 1 : nome>{color}250 Coins : desc>&7Gratuito para você! Colete mensalmente\n&7e adquira itens épicos!'
+  message: '&aVocê coletou sua entrega mensal de 250 Coins!'
+  rewards:
+  - 'SKYWARS_COINS>250'
+  - 'THEBRIDGE_COINS>250'
+ cvip:
+  slot: 12
+  days: 30
+  permission: 'role.vip'
+  icon: 'STORAGE_MINECART : 1 : nome>{color}500 Coins : desc>&7Gratuito para você! Colete mensalmente\n&7e adquira itens épicos!'
+  message: '&aVocê coletou sua entrega mensal de 500 Coins!'
+  rewards:
+  - 'SKYWARS_COINS>500'
+  - 'THEBRIDGE_COINS>500'
+ cmvp:
+  slot: 13
+  days: 30
+  permission: 'role.mvp'
+  icon: 'STORAGE_MINECART : 1 : nome>{color}1000 Coins : desc>&7Gratuito para você! Colete mensalmente\n&7e adquira itens épicos!'
+  message: '&aVocê coletou sua entrega mensal de 1000 Coins!'
+  rewards:
+  - 'SKYWARS_COINS>1000'
+  - 'THEBRIDGE_COINS>1000'
+ cmvpplus:
+  slot: 14
+  days: 30
+  permission: 'role.mvpplus'
+  icon: 'STORAGE_MINECART : 1 : nome>{color}1500 Coins : desc>&7Gratuito para você! Colete mensalmente\n&7e adquira itens épicos!'
+  message: '&aVocê coletou sua entrega mensal de 1500 Coins!'
+  rewards:
+  - 'SKYWARS_COINS>1500'
+  - 'THEBRIDGE_COINS>1500'
+ bvip:
+  slot: 21
+  days: 30
+  permission: 'role.vip'
+  icon: 'POTION:8261 : 2 : esconder>tudo : nome>{color}2 Multiplicadores de Coins : desc>&7Gratuito para você! Colete mensalmente\n&7para conseguir ainda mais coins.\n \n &8▪ &f1 Multiplicador Pessoal 2.0x &7(1 hora)\n &8▪ &f1 Multiplicador Geral 2.0x &7(12 horas)'
+  message: '&aVocê coletou sua entrega mensal de Multiplicadores de Coins!'
+  rewards:
+  - 'PRIVATE_BOOSTER>1:2.0:1'
+  - 'NETWORK_BOOSTER>1:2.0:12'
+ bmvp:
+  slot: 22
+  days: 30
+  permission: 'role.mvp'
+  icon: 'POTION:8261 : 3 : esconder>tudo : nome>{color}3 Multiplicadores de Coins : desc>&7Gratuito para você! Colete mensalmente\n&7para conseguir ainda mais coins.\n \n &8▪ &f2 Multiplicadores Pessoal 2.0x &7(2 horas)\n &8▪ &f1 Multiplicador Geral 2.0x &7(1 dia)'
+  message: '&aVocê coletou sua entrega mensal de Multiplicadores de Coins!'
+  rewards:
+  - 'PRIVATE_BOOSTER>2:2.0:2'
+  - 'NETWORK_BOOSTER>1:2.0:24'
+ bmvpplus:
+  slot: 23
+  days: 30
+  permission: 'role.mvpplus'
+  icon: 'POTION:8261 : 5 : esconder>tudo : nome>{color}5 Multiplicadores de Coins : desc>&7Gratuito para você! Colete mensalmente\n&7para conseguir ainda mais coins.\n \n &8▪ &f3 Multiplicadores Pessoal 2.0x &7(2 horas)\n &8▪ &f2 Multiplicadores Geral 2.0x &7(1 dia)'
+  message: '&aVocê coletou sua entrega mensal de Multiplicadores de Coins!'
+  rewards:
+  - 'PRIVATE_BOOSTER>3:2.0:2'
+  - 'NETWORK_BOOSTER>2:2.0:24'

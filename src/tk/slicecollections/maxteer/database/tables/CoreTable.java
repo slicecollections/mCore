@@ -22,7 +22,7 @@ public class CoreTable extends DataTable {
   public Map<String, DataContainer> getDefaultValues() {
     Map<String, DataContainer> defaultValues = new LinkedHashMap<>();
     defaultValues.put("role", new DataContainer("Membro"));
-    defaultValues.put("deliveries", new DataContainer("[]"));
+    defaultValues.put("deliveries", new DataContainer("{}"));
     defaultValues.put("preferences", new DataContainer("{\"pv\": 0, \"pm\": 0, \"bg\": 0, \"pl\": 0}"));
     defaultValues.put("titles", new DataContainer("[]"));
     defaultValues.put("boosters", new DataContainer("{}"));

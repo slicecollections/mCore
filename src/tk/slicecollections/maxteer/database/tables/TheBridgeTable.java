@@ -17,7 +17,7 @@ public class TheBridgeTable extends DataTable {
   public void init(Database database) {
     if (database.query("SHOW COLUMNS FROM `mCoreTheBridge` LIKE 'winstreak'") == null) {
       database.execute(
-          "ALTER TABLE `mcorethebridge` ADD `winstreak` LONG DEFAULT 0 AFTER `coins`, ADD `laststreak` LONG DEFAULT 0 AFTER `winstreak`, ADD `lastmap` LONG DEFAULT 0 AFTER `laststreak`");
+          "ALTER TABLE `mCoreTheBridge` ADD `winstreak` LONG DEFAULT 0 AFTER `coins`, ADD `laststreak` LONG DEFAULT 0 AFTER `winstreak`, ADD `lastmap` LONG DEFAULT 0 AFTER `laststreak`");
     }
   }
 
