@@ -24,6 +24,7 @@ import tk.slicecollections.maxteer.database.data.container.TitlesContainer;
 import tk.slicecollections.maxteer.database.data.interfaces.AbstractContainer;
 import tk.slicecollections.maxteer.game.Game;
 import tk.slicecollections.maxteer.game.GameTeam;
+import tk.slicecollections.maxteer.hook.FriendsHook;
 import tk.slicecollections.maxteer.player.enums.PlayerVisibility;
 import tk.slicecollections.maxteer.player.hotbar.Hotbar;
 import tk.slicecollections.maxteer.player.role.Role;
@@ -114,7 +115,8 @@ public class Profile {
         Player players = profile.getPlayer();
 
         if (!playingGame() && !profile.playingGame()) {
-          if (this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS) {
+          boolean friend = FriendsHook.isFriend(player.getName(), players.getName());
+          if ((this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || friend) && !FriendsHook.isBlacklisted(player.getName(), players.getName())) {
             if (!player.canSee(players)) {
               TitleManager.show(this, profile);
             }
@@ -126,7 +128,7 @@ public class Profile {
             player.hidePlayer(players);
           }
 
-          if (profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS) {
+          if ((profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || friend) && !FriendsHook.isBlacklisted(players.getName(), player.getName())) {
             if (!players.canSee(player)) {
               TitleManager.show(profile, this);
             }
@@ -202,11 +204,9 @@ public class Profile {
   }
 
   public List<Profile> getLastHitters() {
-    List<Profile> hitters = this.lastHit.entrySet().stream()
-        .filter(entry -> isOnline(entry.getKey()))
-        .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+    List<Profile> hitters = this.lastHit.entrySet().stream().filter(entry -> isOnline(entry.getKey())).sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
         .map(entry -> getProfile(entry.getKey())).collect(Collectors.toList());
-    //limpar após uso
+    // limpar após uso
     this.lastHit.clear();
     return hitters;
   }
@@ -308,7 +308,7 @@ public class Profile {
   public DeliveriesContainer getDeliveriesContainer() {
     return this.getAbstractContainer("mCoreProfile", "deliveries", DeliveriesContainer.class);
   }
-  
+
   public PreferencesContainer getPreferencesContainer() {
     return this.getAbstractContainer("mCoreProfile", "preferences", PreferencesContainer.class);
   }
