@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import me.clip.placeholderapi.PlaceholderAPI;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.booster.NetworkBooster;
@@ -30,6 +31,7 @@ import tk.slicecollections.maxteer.player.hotbar.Hotbar;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.player.scoreboard.MScoreboard;
 import tk.slicecollections.maxteer.titles.TitleManager;
+import tk.slicecollections.maxteer.utils.BukkitUtils;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
 public class Profile {
@@ -101,16 +103,23 @@ public class Profile {
 
       player.setAllowFlight(player.hasPermission("mcore.fly"));
     }
+    
+    if (this.hotbar != null) {
+      this.hotbar.apply(this);
+    }
     this.refreshPlayers();
   }
 
   public void refreshPlayers() {
-    if (this.hotbar != null) {
-      this.hotbar.apply(this);
-    }
-
+    Player player = this.getPlayer();
+    this.hotbar.getButtons().forEach(button -> {
+      if (button.getAction().getValue().equalsIgnoreCase("jogadores")) {
+        // Atualizar item de jogadores toda vez que utilizar o Item.
+        player.getInventory().setItem(button.getSlot(), BukkitUtils.deserializeItemStack(PlaceholderAPI.setPlaceholders(player, button.getIcon())));
+      }
+    });
+    
     if (!this.playingGame()) {
-      Player player = this.getPlayer();
       Profile.listProfiles().forEach(profile -> {
         Player players = profile.getPlayer();
 

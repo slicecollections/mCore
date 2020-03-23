@@ -22,4 +22,12 @@ public class HotbarAction {
       this.actionType.execute(profile, this.value);
     }
   }
+  
+  public String getValue() {
+    return this.value;
+  }
+  
+  public HotbarActionType getActionType() {
+    return this.actionType;
+  }
 }
