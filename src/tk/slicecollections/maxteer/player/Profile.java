@@ -112,12 +112,13 @@ public class Profile {
 
   public void refreshPlayers() {
     Player player = this.getPlayer();
-    this.hotbar.getButtons().forEach(button -> {
-      if (button.getAction().getValue().equalsIgnoreCase("jogadores")) {
-        // Atualizar item de jogadores toda vez que utilizar o Item.
-        player.getInventory().setItem(button.getSlot(), BukkitUtils.deserializeItemStack(PlaceholderAPI.setPlaceholders(player, button.getIcon())));
-      }
-    });
+    if (this.hotbar != null) {
+      this.hotbar.getButtons().forEach(button -> {
+        if (button.getAction().getValue().equalsIgnoreCase("jogadores")) {
+          player.getInventory().setItem(button.getSlot(), BukkitUtils.deserializeItemStack(PlaceholderAPI.setPlaceholders(player, button.getIcon())));
+        }
+      });
+    }
     
     if (!this.playingGame()) {
       Profile.listProfiles().forEach(profile -> {
