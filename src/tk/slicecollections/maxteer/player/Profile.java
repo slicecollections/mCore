@@ -276,7 +276,9 @@ public class Profile {
       add += amount * nb.getMultiplier();
     }
 
-    return add;
+    // Atualizado: 1.6
+    // Caso não tenha nenhum booster aplicado, o jogador recebe a quantia original
+    return (amount > 0.0 && add == 0.0) ? amount : add;
   }
 
   public void removeCoins(String table, double amount) {
