@@ -1,2 +1,6 @@
-bin/
 .gitattributes
+.gitignore
+
+*.iml
+.idea/
+target/
