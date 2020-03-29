@@ -57,7 +57,7 @@ public class Profile {
     if (this.game != null) {
       TitleManager.leaveLobby(this);
     } else {
-      TitleManager.joinLobby(this);
+      Bukkit.getScheduler().scheduleSyncDelayedTask(Core.getInstance(), () -> TitleManager.joinLobby(this), 5);
     }
   }
 

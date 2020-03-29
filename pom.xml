@@ -6,7 +6,7 @@
 
     <groupId>tk.slicecollections.maxteer</groupId>
     <artifactId>mCore</artifactId>
-    <version>1.7</version>
+    <version>1.8</version>
 
     <properties>
         <main>tk.slicecollections.maxteer.Core</main>
