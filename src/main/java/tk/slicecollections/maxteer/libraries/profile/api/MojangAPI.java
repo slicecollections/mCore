@@ -1,8 +1,8 @@
-package tk.slicecollections.maxteer.libraries.npclib.npc.profile.api;
+package tk.slicecollections.maxteer.libraries.profile.api;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import tk.slicecollections.maxteer.libraries.npclib.npc.profile.Mojang;
+import tk.slicecollections.maxteer.libraries.profile.Mojang;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

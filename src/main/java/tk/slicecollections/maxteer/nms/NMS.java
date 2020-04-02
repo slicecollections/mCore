@@ -109,6 +109,10 @@ public class NMS {
     BRIDGE.sendTitle(player, title, subtitle);
   }
 
+  public static void refreshPlayer(Player player) {
+    BRIDGE.refreshPlayer(player);
+  }
+
   public static void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
     BRIDGE.sendTitle(player, title, subtitle, fadeIn, stay, fadeOut);
   }

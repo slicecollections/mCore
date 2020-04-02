@@ -6,10 +6,11 @@
 
     <groupId>tk.slicecollections.maxteer</groupId>
     <artifactId>mCore</artifactId>
-    <version>1.8</version>
+    <version>1.9</version>
 
     <properties>
-        <main>tk.slicecollections.maxteer.Core</main>
+        <main-bukkit>tk.slicecollections.maxteer.Core</main-bukkit>
+        <main-bungee>tk.slicecollections.maxteer.bungee.Bungee</main-bungee>
 
         <protocollib.version>4.5.0</protocollib.version>
         <placeholder-api.version>2.10.5</placeholder-api.version>
@@ -43,6 +44,13 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.md_5</groupId>
+            <artifactId>bungeecord</artifactId>
+            <version>latest</version>
+            <scope>system</scope>
+            <systemPath>D:/Database/Dependências/BungeeCord.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
@@ -81,6 +89,7 @@
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.spigotmc:*</exclude>
+                                    <exclude>net.md_5:*</exclude>
                                     <exclude>cglib:*</exclude>
                                     <exclude>com.comphenix.**:*</exclude>
                                     <exclude>me.clip:*</exclude>

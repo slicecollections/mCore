@@ -1,4 +1,4 @@
-package tk.slicecollections.maxteer.libraries.npclib.npc.profile.api;
+package tk.slicecollections.maxteer.libraries.profile;
 
 /**
  * @author Maxter

@@ -63,4 +63,6 @@ public interface INMS {
   void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut);
 
   void sendTabHeaderFooter(Player player, String header, String footer);
+
+  void refreshPlayer(Player player);
 }

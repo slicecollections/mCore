@@ -158,13 +158,13 @@ public class Profile {
 
   public void save() {
     // Salvar o último rank para utilização em funções offline como "LeaderBoards"
-    this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(this.getPlayer()).getName()));
+    this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(this.getPlayer(), true).getName()));
     Database.getInstance().save(this.name, this.tableMap);
   }
 
   public void saveSync() {
     // Salvar o último rank para utilização em funções offline como "LeaderBoards"
-    this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(this.getPlayer()).getName()));
+    this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(this.getPlayer(), true).getName()));
     Database.getInstance().saveSync(this.name, this.tableMap);
   }
 

@@ -1,7 +1,12 @@
 package tk.slicecollections.maxteer.nms.v1_8_R3;
 
-import java.util.Collection;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
+import net.minecraft.server.v1_8_R3.PacketPlayOutTitle.EnumTitleAction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -10,32 +15,14 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.metadata.PlayerMetadataStore;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import com.google.common.base.Preconditions;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.EnchantmentManager;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.EntityTracker;
-import net.minecraft.server.v1_8_R3.EntityTrackerEntry;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.MathHelper;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
-import net.minecraft.server.v1_8_R3.PacketPlayOutTitle.EnumTitleAction;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
 import tk.slicecollections.maxteer.libraries.npclib.npc.EntityControllers;
@@ -51,6 +38,10 @@ import tk.slicecollections.maxteer.nms.v1_8_R3.utils.UUIDMetadataStore;
 import tk.slicecollections.maxteer.reflection.Accessors;
 import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.utils.Utils;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Maxter
@@ -243,7 +234,7 @@ public class NMS1_8R3 implements INMS {
 
         if (entity.onGround) {
           f5 = entity.world.getType(new BlockPosition(MathHelper.floor(entity.locX), MathHelper.floor(entity.getBoundingBox().b) - 1, MathHelper.floor(entity.locZ)))
-              .getBlock().frictionFactor * 0.91F;
+            .getBlock().frictionFactor * 0.91F;
         }
 
         float f6 = 0.162771F / (f5 * f5 * f5);
@@ -258,7 +249,7 @@ public class NMS1_8R3 implements INMS {
         f5 = 0.91F;
         if (entity.onGround) {
           f5 = entity.world.getType(new BlockPosition(MathHelper.floor(entity.locX), MathHelper.floor(entity.getBoundingBox().b) - 1, MathHelper.floor(entity.locZ)))
-              .getBlock().frictionFactor * 0.91F;
+            .getBlock().frictionFactor * 0.91F;
         }
 
         if (entity.k_()) {
@@ -282,8 +273,8 @@ public class NMS1_8R3 implements INMS {
           entity.motY = 0.2D;
         }
 
-        if (entity.world.isClientSide && (!entity.world.isLoaded(new BlockPosition((int) entity.locX, 0, (int) entity.locZ))
-            || !entity.world.getChunkAtWorldCoords(new BlockPosition((int) entity.locX, 0, (int) entity.locZ)).o())) {
+        if (entity.world.isClientSide && (!entity.world.isLoaded(new BlockPosition((int) entity.locX, 0, (int) entity.locZ)) || !entity.world
+          .getChunkAtWorldCoords(new BlockPosition((int) entity.locX, 0, (int) entity.locZ)).o())) {
           if (entity.locY > 0.0D) {
             entity.motY = -0.1D;
           } else {
@@ -376,5 +367,59 @@ public class NMS1_8R3 implements INMS {
     Accessors.getField(packet.getClass(), "b").set(packet, ChatSerializer.a("{\"text\": \"" + footer + "\"}"));
 
     ep.playerConnection.sendPacket(packet);
+  }
+
+  @Override
+  public void refreshPlayer(Player player) {
+    EntityPlayer ep = ((CraftPlayer) player).getHandle();
+
+    int entId = ep.getId();
+    Location l = player.getLocation();
+
+    PacketPlayOutPlayerInfo removeInfo = new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, ep);
+    PacketPlayOutEntityDestroy removeEntity = new PacketPlayOutEntityDestroy(entId);
+    PacketPlayOutNamedEntitySpawn addNamed = new PacketPlayOutNamedEntitySpawn(ep);
+    PacketPlayOutPlayerInfo addInfo = new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.ADD_PLAYER, ep);
+    PacketPlayOutPosition pos = new PacketPlayOutPosition(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch(), new HashSet<>());
+    PacketPlayOutEntityEquipment itemhand = new PacketPlayOutEntityEquipment(entId, 0, CraftItemStack.asNMSCopy(player.getItemInHand()));
+    PacketPlayOutEntityEquipment helmet = new PacketPlayOutEntityEquipment(entId, 4, CraftItemStack.asNMSCopy(player.getInventory().getHelmet()));
+    PacketPlayOutEntityEquipment chestplate = new PacketPlayOutEntityEquipment(entId, 3, CraftItemStack.asNMSCopy(player.getInventory().getChestplate()));
+    PacketPlayOutEntityEquipment leggings = new PacketPlayOutEntityEquipment(entId, 2, CraftItemStack.asNMSCopy(player.getInventory().getLeggings()));
+    PacketPlayOutEntityEquipment boots = new PacketPlayOutEntityEquipment(entId, 1, CraftItemStack.asNMSCopy(player.getInventory().getBoots()));
+    PacketPlayOutHeldItemSlot slot = new PacketPlayOutHeldItemSlot(player.getInventory().getHeldItemSlot());
+
+    for (Player players : Bukkit.getOnlinePlayers()) {
+      EntityPlayer epOn = ((CraftPlayer) players).getHandle();
+      PlayerConnection con = epOn.playerConnection;
+      if (players.equals(player)) {
+        con.sendPacket(removeInfo);
+        con.sendPacket(addInfo);
+        con.sendPacket(slot);
+        ((CraftPlayer) players).updateScaledHealth();
+        epOn.triggerHealthUpdate();
+        if (players.isOp()) {
+          players.setOp(false);
+          players.setOp(true);
+        }
+        players.updateInventory();
+        Bukkit.getScheduler().runTask(Core.getInstance(), epOn::updateAbilities);
+      } else {
+        if (players.canSee(player) && players.getWorld().equals(player.getWorld())) {
+          con.sendPacket(removeEntity);
+          con.sendPacket(removeInfo);
+          con.sendPacket(addInfo);
+          con.sendPacket(addNamed);
+          con.sendPacket(pos);
+          con.sendPacket(itemhand);
+          con.sendPacket(helmet);
+          con.sendPacket(chestplate);
+          con.sendPacket(leggings);
+          con.sendPacket(boots);
+        } else {
+          con.sendPacket(removeInfo);
+          con.sendPacket(addInfo);
+        }
+      }
+    }
   }
 }

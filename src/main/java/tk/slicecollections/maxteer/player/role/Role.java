@@ -1,15 +1,17 @@
 package tk.slicecollections.maxteer.player.role;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.sql.rowset.CachedRowSet;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.player.fake.FakeManager;
 import tk.slicecollections.maxteer.plugin.config.MConfig;
 import tk.slicecollections.maxteer.utils.StringUtils;
+
+import javax.sql.rowset.CachedRowSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Maxter
@@ -83,17 +85,34 @@ public class Role {
       ROLES.add(new Role("&7Membro", "&7", "", false, false));
     }
   }
-  
+
   public static String getPrefixed(String name) {
-    return getTaggedName(name, false);
-  }
-  
-  public static String getColored(String name) {
-    return getTaggedName(name, true);
+    return getPrefixed(name, false);
   }
 
-  private static String getTaggedName(String name, boolean onlyColor) {
+  public static String getColored(String name) {
+    return getColored(name, false);
+  }
+
+  public static String getPrefixed(String name, boolean removeFake) {
+    return getTaggedName(name, false, removeFake);
+  }
+
+  public static String getColored(String name, boolean removeFake) {
+    return getTaggedName(name, true, removeFake);
+  }
+
+  private static String getTaggedName(String name, boolean onlyColor, boolean removeFake) {
     String prefix = "&7";
+    if (!removeFake && FakeManager.isFake(name)) {
+      prefix = FakeManager.getFakeRole().getPrefix();
+      if (onlyColor) {
+        prefix = StringUtils.getLastColor(prefix);
+      }
+
+      return prefix + FakeManager.getFake(name);
+    }
+
     Player target = Bukkit.getPlayerExact(name);
     if (target != null) {
       prefix = getPlayerRole(target).getPrefix();
@@ -110,7 +129,11 @@ public class Role {
         if (onlyColor) {
           prefix = StringUtils.getLastColor(prefix);
         }
-        return prefix + rs.getString("name");
+        name = rs.getString("name");
+        if (!removeFake && FakeManager.isFake(name)) {
+          name = FakeManager.getFake(name);
+        }
+        return prefix + name;
       } catch (SQLException ignored) {}
     }
 
@@ -126,7 +149,7 @@ public class Role {
 
     return ROLES.get(ROLES.size() - 1);
   }
-  
+
   public static Role getRoleByPermission(String permission) {
     for (Role role : ROLES) {
       if (role.getPermission().equals(permission)) {
@@ -138,12 +161,24 @@ public class Role {
   }
 
   public static Role getPlayerRole(Player player) {
+    return getPlayerRole(player, false);
+  }
+
+  public static Role getPlayerRole(Player player, boolean removeFake) {
+    if (!removeFake && FakeManager.isFake(player.getName())) {
+      return FakeManager.getFakeRole();
+    }
+
     for (Role role : ROLES) {
       if (role.has(player)) {
         return role;
       }
     }
 
+    return getLastRole();
+  }
+
+  public static Role getLastRole() {
     return ROLES.get(ROLES.size() - 1);
   }
 }

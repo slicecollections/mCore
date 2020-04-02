@@ -1,4 +1,4 @@
-package tk.slicecollections.maxteer.libraries.npclib.npc.profile;
+package tk.slicecollections.maxteer.libraries.profile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.base.Charsets;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import tk.slicecollections.maxteer.libraries.npclib.npc.profile.api.InvalidMojangException;
-import tk.slicecollections.maxteer.libraries.npclib.npc.profile.api.MineToolsAPI;
-import tk.slicecollections.maxteer.libraries.npclib.npc.profile.api.MojangAPI;
+import tk.slicecollections.maxteer.libraries.profile.api.MineToolsAPI;
+import tk.slicecollections.maxteer.libraries.profile.api.MojangAPI;
 
 /**
  * @author Maxter

@@ -1,0 +1,18 @@
+# Ative isso caso esteja utilizando o mCore no Bungee para os comandos.
+bungeecord: false
+# /fake do mCore
+fake:
+  # Role que será aplicada no fake
+  role: 'MVP+'
+  # Nomes que não podem ser utilizados
+  blocked:
+    - 'whereismywaifu'
+  # Nomes aleatórios do /fake random
+  randoms:
+    - 'whereismysword'
+    - 'clankboy17'
+    - 'gameoverdude'
+  # Mensagem de kick ao utilizar o /fake
+  kick-apply: '&c&lREDE SLICE\n \n&aSeu nick foi modificado\n&aEntre novamente no servidor para que faça efeito.'
+  # Mensagem de kick ao utilizar o /faker
+  kick-remove: '&c&lREDE SLICE\n \n&aSeu nick foi resetado\n&aEntre novamente no servidor para que faça efeito.'

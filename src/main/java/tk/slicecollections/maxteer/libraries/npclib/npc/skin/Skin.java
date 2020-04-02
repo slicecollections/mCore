@@ -1,7 +1,7 @@
 package tk.slicecollections.maxteer.libraries.npclib.npc.skin;
 
-import tk.slicecollections.maxteer.libraries.npclib.npc.profile.Mojang;
-import tk.slicecollections.maxteer.libraries.npclib.npc.profile.api.InvalidMojangException;
+import tk.slicecollections.maxteer.libraries.profile.Mojang;
+import tk.slicecollections.maxteer.libraries.profile.InvalidMojangException;
 import tk.slicecollections.maxteer.nms.NMS;
 
 /**

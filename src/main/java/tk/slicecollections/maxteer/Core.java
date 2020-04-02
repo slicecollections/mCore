@@ -1,16 +1,13 @@
 package tk.slicecollections.maxteer;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.messaging.PluginMessageListener;
+import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.achievements.Achievement;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.cmd.Commands;
@@ -23,12 +20,23 @@ import tk.slicecollections.maxteer.libraries.npclib.NPCLibrary;
 import tk.slicecollections.maxteer.listeners.Listeners;
 import tk.slicecollections.maxteer.nms.NMS;
 import tk.slicecollections.maxteer.player.Profile;
+import tk.slicecollections.maxteer.player.fake.FakeAdapter;
+import tk.slicecollections.maxteer.listeners.PluginMessageListener;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.MPlugin;
 import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.Title;
+import tk.slicecollections.maxteer.utils.SliceUpdater;
 
-public class Core extends MPlugin implements PluginMessageListener {
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author Maxter
+ */
+public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginMessageListener {
 
   private static Core instance;
   private static boolean validInit;
@@ -71,8 +79,13 @@ public class Core extends MPlugin implements PluginMessageListener {
     Commands.setupCommands();
     Listeners.setupListeners();
 
+    ProtocolLibrary.getProtocolManager().addPacketListener(new FakeAdapter());
+
     getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
     getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+    getServer().getMessenger().registerIncomingPluginChannel(this, "mCore", new PluginMessageListener());
+
+    Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new SliceUpdater(this, 4).run());
 
     validInit = true;
     this.getLogger().info("O plugin foi ativado.");
@@ -84,6 +97,17 @@ public class Core extends MPlugin implements PluginMessageListener {
       Profile.listProfiles().forEach(Profile::saveSync);
     }
 
+    File update = new File("plugins/mCore/update", "mCore.jar");
+    if (update.exists()) {
+      try {
+        this.getFileUtils().deleteFile(new File("plugins/mCore.jar"));
+        this.getFileUtils().copyFile(new FileInputStream(update), new File("plugins/mCore.jar"));
+        this.getFileUtils().deleteFile(update.getParentFile());
+        this.getLogger().info("Update do mCore aplicada.");
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    }
     this.getLogger().info("O plugin foi desativado.");
   }
 
