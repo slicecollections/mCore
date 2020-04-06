@@ -24,6 +24,7 @@ import tk.slicecollections.maxteer.player.fake.FakeAdapter;
 import tk.slicecollections.maxteer.listeners.PluginMessageListener;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.MPlugin;
+import tk.slicecollections.maxteer.plugin.config.MConfig;
 import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.Title;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
@@ -64,12 +65,19 @@ public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginM
 
     PlaceholderAPI.registerExpansion(new MCoreExpansion());
 
-    Database.setupDatabase();
+    Database.setupDatabase(
+      getConfig().getString("database.tipo"),
+      getConfig().getString("database.mysql.host"),
+      getConfig().getString("database.mysql.porta"),
+      getConfig().getString("database.mysql.nome"),
+      getConfig().getString("database.mysql.usuario"),
+      getConfig().getString("database.mysql.senha")
+    );
 
     NPCLibrary.setupNPCs(this);
     HologramLibrary.setupHolograms(this);
 
-    Role.setupRoles();
+    setupRoles();
     Title.setupTitles();
     Booster.setupBoosters();
     Delivery.setupDeliveries();
@@ -109,6 +117,23 @@ public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginM
       }
     }
     this.getLogger().info("O plugin foi desativado.");
+  }
+
+  private void setupRoles() {
+    MConfig config = getConfig("roles");
+    for (String key : config.getSection("roles").getKeys(false)) {
+      String name = config.getString("roles." + key + ".name");
+      String prefix = config.getString("roles." + key + ".prefix");
+      String permission = config.getString("roles." + key + ".permission");
+      boolean broadcast = config.getBoolean("roles." + key + ".broadcast", true);
+      boolean alwaysVisible = config.getBoolean("roles." + key + ".alwaysvisible", false);
+
+      Role.listRoles().add(new Role(name, prefix, permission, alwaysVisible, broadcast));
+    }
+
+    if (Role.listRoles().isEmpty()) {
+      Role.listRoles().add(new Role("&7Membro", "&7", "", false, false));
+    }
   }
 
   private static Location lobby;

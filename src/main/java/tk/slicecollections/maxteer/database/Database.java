@@ -1,11 +1,11 @@
 package tk.slicecollections.maxteer.database;
 
-import tk.slicecollections.maxteer.Core;
+import tk.slicecollections.maxteer.Manager;
 import tk.slicecollections.maxteer.database.data.DataContainer;
-import tk.slicecollections.maxteer.plugin.logger.MLogger;
 
 import javax.sql.rowset.CachedRowSet;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public abstract class Database {
 
@@ -22,13 +22,12 @@ public abstract class Database {
   public abstract CachedRowSet query(String query, Object... vars);
 
   private static Database instance;
-  public static final MLogger LOGGER = ((MLogger) Core.getInstance().getLogger()).getModule("DATABASE");
+  public static final Logger LOGGER =
+    Manager.BUNGEE ? tk.slicecollections.maxteer.bungee.Bungee.getInstance().getLogger() : tk.slicecollections.maxteer.Core.getInstance().getLogger();
 
-  public static void setupDatabase() {
-    String type = Core.getInstance().getConfig().getString("database.tipo");
-
+  public static void setupDatabase(String type, String mysqlHost, String mysqlPort, String mysqlDbname, String mysqlUsername, String mysqlPassword) {
     if (type.equalsIgnoreCase("mysql")) {
-      instance = new MySQLDatabase();
+      instance = new MySQLDatabase(mysqlHost, mysqlPort, mysqlDbname, mysqlUsername, mysqlPassword);
     }
   }
 

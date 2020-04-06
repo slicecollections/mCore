@@ -26,5 +26,7 @@ public abstract class Commands extends Command {
     new FakeCommand();
     new FakeResetCommand();
     new FakeListCommand();
+    new PartyCommand();
+    new PartyChatCommand();
   }
 }

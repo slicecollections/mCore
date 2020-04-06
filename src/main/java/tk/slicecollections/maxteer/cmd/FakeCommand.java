@@ -3,7 +3,6 @@ package tk.slicecollections.maxteer.cmd;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.player.fake.FakeManager;
-import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.utils.Validator;
 
 import java.util.Collections;
@@ -71,7 +70,7 @@ public class FakeCommand extends Commands {
       List<String> nicked = FakeManager.listNicked();
       StringBuilder sb = new StringBuilder();
       for (int index = 0; index < nicked.size(); index++) {
-        sb.append(Role.getColored(nicked.get(index), false)).append(" §fé na verdade ").append(Role.getColored(nicked.get(index), true)).append(index + 1 == nicked.size() ? "" : "\n");
+        sb.append("§c").append(nicked.get(index)).append(" §fé na verdade ").append("§amcorefakereal:").append(nicked.get(index)).append(index + 1 == nicked.size() ? "" : "\n");
       }
 
       nicked.clear();

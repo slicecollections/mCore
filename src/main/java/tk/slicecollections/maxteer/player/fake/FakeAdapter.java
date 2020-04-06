@@ -56,7 +56,10 @@ public class FakeAdapter extends PacketAdapter {
 
       packet.getPlayerInfoDataLists().write(0, infoDataList);
     } else if (packet.getType() == CHAT) {
-      packet.getChatComponents().write(0, WrappedChatComponent.fromJson(FakeManager.replaceNickedPlayers(packet.getChatComponents().read(0).getJson(), true)));
+      WrappedChatComponent component = packet.getChatComponents().read(0);
+      if (component != null) {
+        packet.getChatComponents().write(0, WrappedChatComponent.fromJson(FakeManager.replaceNickedPlayers(component.getJson(), true)));
+      }
     } else if (packet.getType() == SCOREBOARD_OBJECTIVE) {
       packet.getStrings().write(1, FakeManager.replaceNickedPlayers(packet.getStrings().read(1), true));
     } else if (packet.getType() == SCOREBOARD_SCORE) {

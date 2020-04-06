@@ -30,13 +30,13 @@ public class MySQLDatabase extends Database {
   private Connection connection;
   private ExecutorService executor;
 
-  public MySQLDatabase() {
+  public MySQLDatabase(String host, String port, String dbname, String username, String password) {
     FileConfiguration config = Core.getInstance().getConfig();
-    this.host = config.getString("database.mysql.host");
-    this.port = config.getString("database.mysql.porta");
-    this.dbname = config.getString("database.mysql.nome");
-    this.username = config.getString("database.mysql.usuario");
-    this.password = config.getString("database.mysql.senha");
+    this.host = host;
+    this.port = port;
+    this.dbname = dbname;
+    this.username = username;
+    this.password = password;
 
     this.openConnection();
     this.executor = Executors.newCachedThreadPool();

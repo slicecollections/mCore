@@ -7,6 +7,8 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfiguration;
 import tk.slicecollections.maxteer.bungee.cmd.Commands;
 import tk.slicecollections.maxteer.bungee.listener.Listeners;
+import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
 import java.io.*;
@@ -32,6 +34,17 @@ public class Bungee extends Plugin {
   public void onEnable() {
     saveDefaultConfig();
 
+    Database.setupDatabase(
+      getConfig().getString("database.tipo"),
+      getConfig().getString("database.mysql.host"),
+      getConfig().getString("database.mysql.porta"),
+      getConfig().getString("database.mysql.nome"),
+      getConfig().getString("database.mysql.usuario"),
+      getConfig().getString("database.mysql.senha")
+    );
+
+    setupRoles();
+
     Commands.setupCommands();
     getProxy().getPluginManager().registerListener(this, new Listeners());
 
@@ -46,23 +59,46 @@ public class Bungee extends Plugin {
   }
 
   private Configuration config;
+  private Configuration roles;
 
   public void saveDefaultConfig() {
-    File file = new File("plugins/mCore/utils.yml");
-    if (!file.exists()) {
-      file.getParentFile().mkdirs();
-      copyFile(Bungee.getInstance().getResourceAsStream("utils.yml"), file);
-    }
+    for (String fileName : new String[] {"roles", "utils"}) {
+      File file = new File("plugins/mCore/" + fileName + ".yml");
+      if (!file.exists()) {
+        file.getParentFile().mkdirs();
+        copyFile(Bungee.getInstance().getResourceAsStream(fileName + ".yml"), file);
+      }
 
-    try {
-      this.config = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-    } catch (FileNotFoundException ex) {
-      this.getLogger().log(Level.WARNING, "Cannot load utils.yml: ", ex);
+      try {
+        if (fileName.equals("utils")) {
+          this.config = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+        } else {
+          this.roles = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+        }
+      } catch (FileNotFoundException ex) {
+        this.getLogger().log(Level.WARNING, "Cannot load " + fileName + ".yml: ", ex);
+      }
     }
   }
 
   public Configuration getConfig() {
     return config;
+  }
+
+  private void setupRoles() {
+    for (String key : roles.getSection("roles").getKeys()) {
+      String name = roles.getString("roles." + key + ".name");
+      String prefix = roles.getString("roles." + key + ".prefix");
+      String permission = roles.getString("roles." + key + ".permission");
+      boolean broadcast = roles.getBoolean("roles." + key + ".broadcast", true);
+      boolean alwaysVisible = roles.getBoolean("roles." + key + ".alwaysvisible", false);
+
+      Role.listRoles().add(new Role(name, prefix, permission, alwaysVisible, broadcast));
+    }
+
+    if (Role.listRoles().isEmpty()) {
+      Role.listRoles().add(new Role("&7Membro", "&7", "", false, false));
+    }
   }
 
   public static Bungee getInstance() {
@@ -81,6 +117,10 @@ public class Bungee extends Plugin {
     fakeNames.remove(player.getName());
   }
 
+  public static String getCurrent(String playerName) {
+    return isFake(playerName) ? getFake(playerName) : playerName;
+  }
+
   public static String getFake(String playerName) {
     return fakeNames.get(playerName);
   }
@@ -92,6 +132,19 @@ public class Bungee extends Plugin {
   public static boolean isUsable(String name) {
     return !fakeNames.containsKey(name) && !fakeNames.containsValue(name) && getInstance().getProxy().getPlayer(name) == null && !getInstance().getConfig()
       .getStringList("fake.blocked").contains(name);
+  }
+
+  private static Role role;
+
+  public static Role getFakeRole() {
+    if (role == null) {
+      role = Role.getRoleByName(getInstance().getConfig().getString("fake.role"));
+      if (role == null) {
+        role = Role.getLastRole();
+      }
+    }
+
+    return role;
   }
 
   public static List<String> listNicked() {

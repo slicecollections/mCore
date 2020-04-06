@@ -32,7 +32,7 @@ public class FakeListCommand extends Commands {
     List<String> nicked = Bungee.listNicked();
     StringBuilder sb = new StringBuilder();
     for (int index = 0; index < nicked.size(); index++) {
-      sb.append("§f" + Bungee.getFake(nicked.get(index))).append(" é na verdade ").append(nicked.get(index)).append(index + 1 == nicked.size() ? "" : "\n");
+      sb.append("§c").append(Bungee.getFake(nicked.get(index))).append(" §fé na verdade ").append("§a").append(nicked.get(index)).append(index + 1 == nicked.size() ? "" : "\n");
     }
 
     nicked.clear();

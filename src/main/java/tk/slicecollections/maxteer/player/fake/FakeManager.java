@@ -5,13 +5,16 @@ import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.Core;
-import tk.slicecollections.maxteer.libraries.profile.Mojang;
 import tk.slicecollections.maxteer.libraries.profile.InvalidMojangException;
+import tk.slicecollections.maxteer.libraries.profile.Mojang;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.config.MConfig;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,21 +93,24 @@ public class FakeManager {
     return bungeeSide;
   }
 
+  private static final Pattern REAL_PATTERN = Pattern.compile("(?i)mcorefakereal:\\w*");
+
   public static String replaceNickedPlayers(String original, boolean toFake) {
     String replaced = original;
     for (String name : listNicked()) {
-      Pattern pattern = Pattern.compile("(?i)" + (toFake ? name : getFake(name)));
-      Matcher matcher = pattern.matcher(replaced);
+      Matcher matcher = Pattern.compile("(?i)" + (toFake ? name : getFake(name))).matcher(replaced);
 
-      StringBuffer replacementBuffer = new StringBuffer();
       while (matcher.find()) {
-        matcher.appendReplacement(replacementBuffer, toFake ? getFake(name) : name);
+        replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(toFake ? getFake(name) : name));
       }
-      matcher.appendTail(replacementBuffer);
-
-      replaced = replacementBuffer.toString();
     }
 
+    Matcher matcher = REAL_PATTERN.matcher(replaced);
+    while (matcher.find()) {
+      System.out.println(matcher.group());
+      replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(
+        fakeNames.entrySet().stream().filter(entry -> entry.getValue().equals(matcher.group().replace("mcorefakereal:", ""))).map(Map.Entry::getKey).findFirst().orElse("")));
+    }
     return replaced;
   }
 

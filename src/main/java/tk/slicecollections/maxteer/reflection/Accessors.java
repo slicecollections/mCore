@@ -172,7 +172,7 @@ public class Accessors {
    */
   public static MethodAccessor getMethod(Class clazz, int index, Class returnType, String methodName, Class... parameters) {
     int indexCopy = index;
-    for (final Method method : clazz.getDeclaredMethods()) {
+    for (final Method method : clazz.getMethods()) {
       if ((methodName == null || method.getName().equals(methodName)) && (returnType == null || method.getReturnType().equals(returnType)) && (parameters == null || Arrays
         .equals(method.getParameterTypes(), parameters)) && index-- == 0) {
         return new MethodAccessor(method, true);

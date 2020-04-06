@@ -1,11 +1,7 @@
 package tk.slicecollections.maxteer.player.role;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import tk.slicecollections.maxteer.Core;
+import tk.slicecollections.maxteer.Manager;
 import tk.slicecollections.maxteer.database.Database;
-import tk.slicecollections.maxteer.player.fake.FakeManager;
-import tk.slicecollections.maxteer.plugin.config.MConfig;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
 import javax.sql.rowset.CachedRowSet;
@@ -63,28 +59,11 @@ public class Role {
     return this.broadcast;
   }
 
-  public boolean has(Player player) {
-    return this.isDefault() || player.hasPermission(this.permission);
+  public boolean has(Object player) {
+    return this.isDefault() || Manager.hasPermission(player, this.permission);
   }
 
   private static final List<Role> ROLES = new ArrayList<>();
-
-  public static void setupRoles() {
-    MConfig config = Core.getInstance().getConfig("roles");
-    for (String key : config.getSection("roles").getKeys(false)) {
-      String name = config.getString("roles." + key + ".name");
-      String prefix = config.getString("roles." + key + ".prefix");
-      String permission = config.getString("roles." + key + ".permission");
-      boolean broadcast = config.getBoolean("roles." + key + ".broadcast", true);
-      boolean alwaysVisible = config.getBoolean("roles." + key + ".alwaysvisible", false);
-
-      ROLES.add(new Role(name, prefix, permission, alwaysVisible, broadcast));
-    }
-
-    if (ROLES.size() == 0) {
-      ROLES.add(new Role("&7Membro", "&7", "", false, false));
-    }
-  }
 
   public static String getPrefixed(String name) {
     return getPrefixed(name, false);
@@ -104,18 +83,18 @@ public class Role {
 
   private static String getTaggedName(String name, boolean onlyColor, boolean removeFake) {
     String prefix = "&7";
-    if (!removeFake && FakeManager.isFake(name)) {
-      prefix = FakeManager.getFakeRole().getPrefix();
+    if (!removeFake && Manager.isFake(name)) {
+      prefix = Manager.getFakeRole().getPrefix();
       if (onlyColor) {
         prefix = StringUtils.getLastColor(prefix);
       }
 
-      return prefix + FakeManager.getFake(name);
+      return prefix + Manager.getFake(name);
     }
 
-    Player target = Bukkit.getPlayerExact(name);
+    Object target = Manager.getPlayer(name);
     if (target != null) {
-      prefix = getPlayerRole(target).getPrefix();
+      prefix = getPlayerRole(target, true).getPrefix();
       if (onlyColor) {
         prefix = StringUtils.getLastColor(prefix);
       }
@@ -130,8 +109,8 @@ public class Role {
           prefix = StringUtils.getLastColor(prefix);
         }
         name = rs.getString("name");
-        if (!removeFake && FakeManager.isFake(name)) {
-          name = FakeManager.getFake(name);
+        if (!removeFake && Manager.isFake(name)) {
+          name = Manager.getFake(name);
         }
         return prefix + name;
       } catch (SQLException ignored) {}
@@ -160,13 +139,13 @@ public class Role {
     return null;
   }
 
-  public static Role getPlayerRole(Player player) {
+  public static Role getPlayerRole(Object player) {
     return getPlayerRole(player, false);
   }
 
-  public static Role getPlayerRole(Player player, boolean removeFake) {
-    if (!removeFake && FakeManager.isFake(player.getName())) {
-      return FakeManager.getFakeRole();
+  public static Role getPlayerRole(Object player, boolean removeFake) {
+    if (!removeFake && Manager.isFake(Manager.getName(player))) {
+      return Manager.getFakeRole();
     }
 
     for (Role role : ROLES) {
@@ -180,5 +159,9 @@ public class Role {
 
   public static Role getLastRole() {
     return ROLES.get(ROLES.size() - 1);
+  }
+
+  public static List<Role> listRoles() {
+    return ROLES;
   }
 }

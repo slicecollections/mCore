@@ -39,6 +39,7 @@ public abstract class Commands extends Command {
     new CoreCommand();
     if (!FakeManager.isBungeeSide()) {
       new FakeCommand();
+      new PartyCommand();
     }
   }
 }

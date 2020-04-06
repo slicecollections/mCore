@@ -16,3 +16,13 @@ fake:
   kick-apply: '&c&lREDE SLICE\n \n&aSeu nick foi modificado\n&aEntre novamente no servidor para que faça efeito.'
   # Mensagem de kick ao utilizar o /faker
   kick-remove: '&c&lREDE SLICE\n \n&aSeu nick foi resetado\n&aEntre novamente no servidor para que faça efeito.'
+# /party do mCore
+party:
+  # Tamanho da party por permissão
+  # (_) é igual a (.)
+  # Tamanho padrão: 3
+  size:
+    role_master: 20
+    role_youtuber: 15
+    role_mvpplus: 10
+    role_mvp: 5
