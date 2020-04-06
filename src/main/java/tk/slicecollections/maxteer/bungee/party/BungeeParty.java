@@ -98,6 +98,10 @@ public class BungeeParty extends Party {
       String leader = Role.getPrefixed(this.getLeader());
       ServerInfo finalServerInfo = serverInfo;
       members.forEach(member -> {
+        if (isLeader(member)) {
+          return;
+        }
+
         ProxiedPlayer player = (ProxiedPlayer) Manager.getPlayer(member);
         if (player != null && (player.getServer() == null || !player.getServer().getInfo().getName().equals(finalServerInfo.getName()))) {
           player.connect(finalServerInfo);
