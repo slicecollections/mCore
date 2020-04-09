@@ -40,7 +40,6 @@ import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.utils.Utils;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -380,7 +379,6 @@ public class NMS1_8R3 implements INMS {
     PacketPlayOutEntityDestroy removeEntity = new PacketPlayOutEntityDestroy(entId);
     PacketPlayOutNamedEntitySpawn addNamed = new PacketPlayOutNamedEntitySpawn(ep);
     PacketPlayOutPlayerInfo addInfo = new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.ADD_PLAYER, ep);
-    PacketPlayOutPosition pos = new PacketPlayOutPosition(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch(), new HashSet<>());
     PacketPlayOutEntityEquipment itemhand = new PacketPlayOutEntityEquipment(entId, 0, CraftItemStack.asNMSCopy(player.getItemInHand()));
     PacketPlayOutEntityEquipment helmet = new PacketPlayOutEntityEquipment(entId, 4, CraftItemStack.asNMSCopy(player.getInventory().getHelmet()));
     PacketPlayOutEntityEquipment chestplate = new PacketPlayOutEntityEquipment(entId, 3, CraftItemStack.asNMSCopy(player.getInventory().getChestplate()));
@@ -409,7 +407,6 @@ public class NMS1_8R3 implements INMS {
           con.sendPacket(removeInfo);
           con.sendPacket(addInfo);
           con.sendPacket(addNamed);
-          con.sendPacket(pos);
           con.sendPacket(itemhand);
           con.sendPacket(helmet);
           con.sendPacket(chestplate);

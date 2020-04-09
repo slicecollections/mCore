@@ -34,12 +34,25 @@ public class PartyCommand extends Commands {
     ProxiedPlayer player = (ProxiedPlayer) sender;
     if (args.length == 0) {
       player.sendMessage(TextComponent.fromLegacyText(
-        " \n§3/p [mensagem] §f- §7Comunicar-se com os membros.\n§3/party aceitar [jogador] §f- §7Aceitar uma solicitação.\n§3/party ajuda §f- §7Mostrar essa mensagem de ajuda.\n§3/party convidar [jogador] §f- §7Convidar um jogador.\n§3/party deletar §f- §7Deletar a party.\n§3/party expulsar [jogador] §f- §7Expulsar um membro.\n§3/party info §f- §7Informações da sua Party.\n§3/party negar [jogador] §f- §7Negar uma solicitação.\n§3/party sair §f- §7Sair da Party.\n§3/party transferir [jogador] §f- §7Transferir a Party para outro membro.\n "));
+        " \n§3/p [mensagem] §f- §7Comunicar-se com os membros.\n§3/party puxar §f- §7Puxar os membros até você.\n§3/party aceitar [jogador] §f- §7Aceitar uma solicitação.\n§3/party ajuda §f- §7Mostrar essa mensagem de ajuda.\n§3/party convidar [jogador] §f- §7Convidar um jogador.\n§3/party deletar §f- §7Deletar a party.\n§3/party expulsar [jogador] §f- §7Expulsar um membro.\n§3/party info §f- §7Informações da sua Party.\n§3/party negar [jogador] §f- §7Negar uma solicitação.\n§3/party sair §f- §7Sair da Party.\n§3/party transferir [jogador] §f- §7Transferir a Party para outro membro.\n "));
       return;
     }
 
     String action = args[0];
-    if (action.equalsIgnoreCase("aceitar")) {
+    if (action.equalsIgnoreCase("puxar")) {
+      BungeeParty party = BungeePartyManager.getMemberParty(player.getName());
+      if (party == null) {
+        player.sendMessage(TextComponent.fromLegacyText("§cVocê não pertence a uma Party."));
+        return;
+      }
+
+      if (!party.isLeader(player.getName())) {
+        player.sendMessage(TextComponent.fromLegacyText("§cVocê não é o Líder da Party."));
+        return;
+      }
+
+      party.summonMembers(player.getServer().getInfo());
+    } else if (action.equalsIgnoreCase("aceitar")) {
       if (args.length == 1) {
         player.sendMessage(TextComponent.fromLegacyText("§cUtilize /party aceitar [jogador]"));
         return;
@@ -73,7 +86,7 @@ public class PartyCommand extends Commands {
       player.sendMessage(TextComponent.fromLegacyText(" \n§aVocê entrou na Party de " + Role.getPrefixed(target) + "§a!\n "));
     } else if (action.equalsIgnoreCase("ajuda")) {
       player.sendMessage(TextComponent.fromLegacyText(
-        " \n§3/p [mensagem] §f- §7Comunicar-se com os membros.\n§3/party aceitar [jogador] §f- §7Aceitar uma solicitação.\n§3/party ajuda §f- §7Mostrar essa mensagem de ajuda.\n§3/party convidar [jogador] §f- §7Convidar um jogador.\n§3/party deletar §f- §7Deletar a party.\n§3/party expulsar [jogador] §f- §7Expulsar um membro.\n§3/party info §f- §7Informações da sua Party.\n§3/party negar [jogador] §f- §7Negar uma solicitação.\n§3/party sair §f- §7Sair da Party.\n§3/party transferir [jogador] §f- §7Transferir a Party para outro membro.\n "));
+        " \n§3/p [mensagem] §f- §7Comunicar-se com os membros.\n§3/party puxar §f- §7Puxar os membros até você.\n§3/party aceitar [jogador] §f- §7Aceitar uma solicitação.\n§3/party ajuda §f- §7Mostrar essa mensagem de ajuda.\n§3/party convidar [jogador] §f- §7Convidar um jogador.\n§3/party deletar §f- §7Deletar a party.\n§3/party expulsar [jogador] §f- §7Expulsar um membro.\n§3/party info §f- §7Informações da sua Party.\n§3/party negar [jogador] §f- §7Negar uma solicitação.\n§3/party sair §f- §7Sair da Party.\n§3/party transferir [jogador] §f- §7Transferir a Party para outro membro.\n "));
     } else if (action.equalsIgnoreCase("deletar")) {
       BungeeParty party = BungeePartyManager.getMemberParty(player.getName());
       if (party == null) {
