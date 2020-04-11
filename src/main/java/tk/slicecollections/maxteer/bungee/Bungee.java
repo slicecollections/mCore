@@ -35,12 +35,12 @@ public class Bungee extends Plugin {
     saveDefaultConfig();
 
     Database.setupDatabase(
-      getConfig().getString("database.tipo"),
-      getConfig().getString("database.mysql.host"),
-      getConfig().getString("database.mysql.porta"),
-      getConfig().getString("database.mysql.nome"),
-      getConfig().getString("database.mysql.usuario"),
-      getConfig().getString("database.mysql.senha")
+      config.getString("database.tipo"),
+      config.getString("database.mysql.host"),
+      config.getString("database.mysql.porta"),
+      config.getString("database.mysql.nome"),
+      config.getString("database.mysql.usuario"),
+      config.getString("database.mysql.senha")
     );
 
     setupRoles();
@@ -59,10 +59,11 @@ public class Bungee extends Plugin {
   }
 
   private Configuration config;
+  private Configuration utils;
   private Configuration roles;
 
   public void saveDefaultConfig() {
-    for (String fileName : new String[] {"roles", "utils"}) {
+    for (String fileName : new String[] {"config", "roles", "utils"}) {
       File file = new File("plugins/mCore/" + fileName + ".yml");
       if (!file.exists()) {
         file.getParentFile().mkdirs();
@@ -70,8 +71,10 @@ public class Bungee extends Plugin {
       }
 
       try {
-        if (fileName.equals("utils")) {
+        if (fileName.equals("config")) {
           this.config = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+        } else if (fileName.equals("utils")) {
+          this.utils = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         } else {
           this.roles = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         }
@@ -82,7 +85,7 @@ public class Bungee extends Plugin {
   }
 
   public Configuration getConfig() {
-    return config;
+    return utils;
   }
 
   private void setupRoles() {

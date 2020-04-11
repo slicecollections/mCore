@@ -1,7 +1,5 @@
 package tk.slicecollections.maxteer.database;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
 
@@ -31,7 +29,6 @@ public class MySQLDatabase extends Database {
   private ExecutorService executor;
 
   public MySQLDatabase(String host, String port, String dbname, String username, String password) {
-    FileConfiguration config = Core.getInstance().getConfig();
     this.host = host;
     this.port = port;
     this.dbname = dbname;

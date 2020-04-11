@@ -9,6 +9,8 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
 import net.md_5.bungee.event.EventHandler;
 import tk.slicecollections.maxteer.bungee.Bungee;
+import tk.slicecollections.maxteer.bungee.party.BungeeParty;
+import tk.slicecollections.maxteer.bungee.party.BungeePartyManager;
 import tk.slicecollections.maxteer.libraries.profile.InvalidMojangException;
 import tk.slicecollections.maxteer.libraries.profile.Mojang;
 
@@ -20,6 +22,11 @@ public class Listeners implements Listener {
   @EventHandler(priority = (byte) 128)
   public void onServerConnected(ServerConnectedEvent evt) {
     ProxiedPlayer player = evt.getPlayer();
+
+    BungeeParty party = BungeePartyManager.getLeaderParty(player.getName());
+    if (party != null) {
+      party.sendData(evt.getServer().getInfo());
+    }
 
     if (Bungee.isFake(player.getName())) {
       // Enviar dados desse jogador que está utilizando Fake para o servidor processar.
