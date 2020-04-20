@@ -23,7 +23,7 @@ public class CoreTable extends DataTable {
   @Override
   public void init(Database database) {
     if (database.query("SHOW COLUMNS FROM `mCoreProfile` LIKE 'cash'") == null) {
-      database.execute("ALTER TABLE `mCoreProfile` ADD `cash` LONG DEFAULT 0 AFTER `name`");
+      database.execute("ALTER TABLE `mCoreProfile` ADD `cash` LONG AFTER `name`");
     }
   }
 
