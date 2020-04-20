@@ -1,8 +1,9 @@
 package tk.slicecollections.maxteer.hook;
 
-import org.bukkit.entity.Player;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.Core;
+import tk.slicecollections.maxteer.cash.CashManager;
 import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.player.enums.PlayerVisibility;
 import tk.slicecollections.maxteer.player.role.Role;
@@ -60,6 +61,8 @@ public class MCoreExpansion extends PlaceholderExpansion {
       return StringUtils.formatNumber(online);
     } else if (params.equals("role")) {
       return Role.getPlayerRole(player).getName();
+    } else if (params.equals("cash")) {
+      return StringUtils.formatNumber(CashManager.getCash(player));
     } else if (params.equals("status_jogadores")) {
       return profile.getPreferencesContainer().getPlayerVisibility().getName();
     } else if (params.equals("status_jogadores_nome")) {
@@ -91,6 +94,8 @@ public class MCoreExpansion extends PlaceholderExpansion {
         return StringUtils.formatNumber(profile.getStats(table, value));
       } else if (value.equals("2v2kills") || value.equals("2v2deaths") || value.equals("2v2games") || value.equals("2v2points") || value.equals("2v2wins")) {
         return StringUtils.formatNumber(profile.getStats(table, value));
+      } else if (value.equals("winstreak")) {
+        return StringUtils.formatNumber(profile.getDailyStats(table, "laststreak", value));
       } else if (value.equals("coins")) {
         return StringUtils.formatNumber(profile.getCoins(table));
       }

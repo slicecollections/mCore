@@ -25,14 +25,17 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPCAnimation;
 import tk.slicecollections.maxteer.libraries.npclib.npc.EntityControllers;
+import tk.slicecollections.maxteer.libraries.npclib.npc.ai.NPCHolder;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.interfaces.INMS;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
+import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
+import tk.slicecollections.maxteer.nms.v1_8_R3.entity.*;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityArmorStand;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityArmorStand.CraftArmorStand;
-import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityStand;
-import tk.slicecollections.maxteer.nms.v1_8_R3.entity.HumanController;
+import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntitySlime;
 import tk.slicecollections.maxteer.nms.v1_8_R3.utils.PlayerlistTrackerEntry;
 import tk.slicecollections.maxteer.nms.v1_8_R3.utils.UUIDMetadataStore;
 import tk.slicecollections.maxteer.reflection.Accessors;
@@ -40,17 +43,29 @@ import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.utils.Utils;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Maxter
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class NMS1_8R3 implements INMS {
 
   @SuppressWarnings("rawtypes")
-  private FieldAccessor<Set> SET_TRACKERS;
+  private final FieldAccessor<Set> SET_TRACKERS;
+  private final FieldAccessor<Map> CLASS_TO_ID, CLASS_TO_NAME;
 
   public NMS1_8R3() {
+    CLASS_TO_ID = Accessors.getField(EntityTypes.class, "f", Map.class);
+    CLASS_TO_NAME = Accessors.getField(EntityTypes.class, "d", Map.class);
+
+    CLASS_TO_ID.get(null).put(EntityStand.class, 30);
+    CLASS_TO_NAME.get(null).put(EntityStand.class, "mCore-EntityStand");
+    CLASS_TO_ID.get(null).put(EntityArmorStand.class, 30);
+    CLASS_TO_NAME.get(null).put(EntityArmorStand.class, "mCore-ArmorStand");
+    CLASS_TO_ID.get(null).put(EntitySlime.class, 55);
+    CLASS_TO_NAME.get(null).put(EntitySlime.class, "mCore-Slime");
     SET_TRACKERS = Accessors.getField(EntityTracker.class, "c", Set.class);
 
     FieldAccessor<PlayerMetadataStore> metadatastore = Accessors.getField(CraftServer.class, "playerMetadata", PlayerMetadataStore.class);
@@ -64,6 +79,14 @@ public class NMS1_8R3 implements INMS {
   @Override
   public void sendTabListAdd(Player player, Player listPlayer) {
     sendPacket(player, new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer) listPlayer).getHandle()));
+  }
+
+  @Override
+  public void playAnimation(Entity entity, NPCAnimation animation) {
+    net.minecraft.server.v1_8_R3.Entity en = ((CraftEntity) entity).getHandle();
+    if (en instanceof EntityNPCPlayer) {
+      ((EntityNPCPlayer) en).playAnimation(animation);
+    }
   }
 
   @Override
@@ -306,6 +329,18 @@ public class NMS1_8R3 implements INMS {
     return null;
   }
 
+  public ISlime createSlime(Location location, HologramLine line) {
+    ISlime slime = new EntitySlime(((CraftWorld) location.getWorld()).getHandle(), line);
+    net.minecraft.server.v1_8_R3.Entity entity = (net.minecraft.server.v1_8_R3.Entity) slime;
+    slime.setLocation(location.getX(), location.getY(), location.getZ());
+
+    if (addEntity(entity)) {
+      return slime;
+    }
+
+    return null;
+  }
+
   @Override
   public Hologram getHologram(Entity entity) {
     if (entity == null) {
@@ -387,6 +422,10 @@ public class NMS1_8R3 implements INMS {
     PacketPlayOutHeldItemSlot slot = new PacketPlayOutHeldItemSlot(player.getInventory().getHeldItemSlot());
 
     for (Player players : Bukkit.getOnlinePlayers()) {
+      if (players instanceof NPCHolder) {
+        continue;
+      }
+
       EntityPlayer epOn = ((CraftPlayer) players).getHandle();
       PlayerConnection con = epOn.playerConnection;
       if (players.equals(player)) {
@@ -412,7 +451,7 @@ public class NMS1_8R3 implements INMS {
           con.sendPacket(chestplate);
           con.sendPacket(leggings);
           con.sendPacket(boots);
-        } else {
+        } else if (players.canSee(player)) {
           con.sendPacket(removeInfo);
           con.sendPacket(addInfo);
         }

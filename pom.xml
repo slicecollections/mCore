@@ -6,7 +6,7 @@
 
     <groupId>tk.slicecollections.maxteer</groupId>
     <artifactId>mCore</artifactId>
-    <version>2.2</version>
+    <version>2.3</version>
 
     <properties>
         <main-bukkit>tk.slicecollections.maxteer.Core</main-bukkit>
@@ -85,6 +85,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <!-- <outputFile>D:\Database\Servidores\mthebridge\plugins\${project.artifactId}.jar</outputFile> -->
                             <outputFile>D:\Database\SliceCollections\${project.artifactId}.jar</outputFile>
                             <artifactSet>
                                 <excludes>

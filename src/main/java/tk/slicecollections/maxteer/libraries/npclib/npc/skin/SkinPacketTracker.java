@@ -14,7 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import com.google.common.base.Preconditions;
 import tk.slicecollections.maxteer.libraries.npclib.NPCLibrary;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.nms.NMS;
 
 public class SkinPacketTracker {

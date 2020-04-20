@@ -8,8 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPCAnimation;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
+import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
 
 import java.util.Collection;
 
@@ -20,9 +22,13 @@ public interface INMS {
 
   IArmorStand createArmorStand(Location location, String name, HologramLine line);
 
+  ISlime createSlime(Location location, HologramLine line);
+
   Hologram getHologram(Entity entity);
 
   boolean isHologramEntity(Entity entity);
+
+  void playAnimation(Entity entity, NPCAnimation animation);
 
   void setValueAndSignature(Player player, String value, String signature);
 

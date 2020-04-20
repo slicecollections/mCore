@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -18,8 +19,8 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.api.event.*;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinUpdateTracker;
 import tk.slicecollections.maxteer.nms.NMS;
 
@@ -60,6 +61,16 @@ public class NPCListeners implements Listener {
       Bukkit.getPluginManager().callEvent(event);
       if (!event.isCancelled()) {
         npc.destroy();
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onEntityDamage(EntityDamageEvent evt) {
+    if (NPCLibrary.isNPC(evt.getEntity())) {
+      NPC npc = NPCLibrary.getNPC(evt.getEntity());
+      if (!npc.isProtected()) {
+        evt.setCancelled(false);
       }
     }
   }

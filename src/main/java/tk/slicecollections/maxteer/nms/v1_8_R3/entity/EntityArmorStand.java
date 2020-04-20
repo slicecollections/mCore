@@ -43,10 +43,6 @@ public class EntityArmorStand extends net.minecraft.server.v1_8_R3.EntityArmorSt
     a(new NullBoundingBox());
   }
 
-  public void a(NBTTagCompound nbttagcompound) {}
-
-  public void b(NBTTagCompound nbttagcompound) {}
-
   public boolean c(NBTTagCompound nbttagcompound) {
     return false;
   }
@@ -73,9 +69,10 @@ public class EntityArmorStand extends net.minecraft.server.v1_8_R3.EntityArmorSt
 
   public void t_() {
     this.ticksLived = 0;
-    if (dead) {
-      super.t_();
+    if (line == null) {
+      this.dead = true;
     }
+    super.t_();
   }
 
   public void makeSound(String sound, float f1, float f2) {}
@@ -191,21 +188,31 @@ public class EntityArmorStand extends net.minecraft.server.v1_8_R3.EntityArmorSt
 
     public void setBasePlate(boolean basePlate) {}
 
-    public void setBodyPose(EulerAngle pose) {}
+    public void setBodyPose(EulerAngle pose) {
+      ((EntityArmorStand) entity).setBodyPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
 
     public void setGravity(boolean gravity) {}
 
-    public void setHeadPose(EulerAngle pose) {}
+    public void setHeadPose(EulerAngle pose) {
+      ((EntityArmorStand) entity).setHeadPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
 
-    public void setLeftArmPose(EulerAngle pose) {}
+    public void setLeftArmPose(EulerAngle pose) {
+      ((EntityArmorStand) entity).setLeftArmPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
 
-    public void setLeftLegPose(EulerAngle pose) {}
+    public void setLeftLegPose(EulerAngle pose) {
+      ((EntityArmorStand) entity).setLeftLegPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
 
-    public void setRightArmPose(EulerAngle pose) {}
+    public void setRightArmPose(EulerAngle pose) {
+      ((EntityArmorStand) entity).setRightArmPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
 
-    public void setRightLegPose(EulerAngle pose) {}
-
-    public void setSmall(boolean small) {}
+    public void setRightLegPose(EulerAngle pose) {
+      ((EntityArmorStand) entity).setRightLegPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
 
     public void setVisible(boolean visible) {}
 

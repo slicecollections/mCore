@@ -38,6 +38,7 @@ public class MenuServers extends UpdatablePlayerMenu {
 
           if (item != null && item.getType() != Material.AIR) {
             if (DISABLED_SLOTS.contains(evt.getSlot())) {
+              this.player.sendMessage("§cVocê já está conectado a este servidor.");
               return;
             }
 

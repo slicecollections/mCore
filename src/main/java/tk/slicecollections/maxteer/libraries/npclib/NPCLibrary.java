@@ -8,14 +8,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import tk.slicecollections.maxteer.Core;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
-import tk.slicecollections.maxteer.libraries.npclib.api.npc.EntityController;
+import tk.slicecollections.maxteer.libraries.npclib.api.EntityController;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.AbstractNPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.EntityControllers;
 import tk.slicecollections.maxteer.libraries.npclib.npc.ai.NPCHolder;
 import tk.slicecollections.maxteer.plugin.MPlugin;
-import tk.slicecollections.maxteer.plugin.logger.MLogger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,9 +27,7 @@ public class NPCLibrary {
 
   private static Plugin plugin;
   private static Listener LISTENER;
-  private static List<NPC> npcs = new ArrayList<>();
-
-  public static final MLogger LOGGER = ((MLogger) Core.getInstance().getLogger()).getModule("NPCS");
+  private static final List<NPC> NPCS = new ArrayList<>();
 
   public static void setupNPCs(MPlugin pl) {
     if (pl == null || plugin != null) {
@@ -53,12 +49,12 @@ public class NPCLibrary {
 
     EntityController controller = EntityControllers.getController(type);
     NPC npc = new AbstractNPC(uuid, name, controller);
-    npcs.add(npc);
+    NPCS.add(npc);
     return npc;
   }
 
   public static void unregister(NPC npc) {
-    npcs.remove(npc);
+    NPCS.remove(npc);
   }
 
   public static void unregisterAll() {
@@ -67,8 +63,8 @@ public class NPCLibrary {
     }
 
     HandlerList.unregisterAll(LISTENER);
+    NPCS.clear();
     plugin = null;
-    npcs = null;
   }
 
   public static boolean isNPC(Entity entity) {
@@ -79,11 +75,15 @@ public class NPCLibrary {
     return entity instanceof NPCHolder ? ((NPCHolder) entity).getNPC() : null;
   }
 
+  public static NPC findNPC(UUID uuid) {
+    return listNPCS().stream().filter(npc -> npc.getUUID().equals(uuid)).findFirst().orElse(null);
+  }
+
   public static Plugin getPlugin() {
     return plugin;
   }
 
   public static Collection<NPC> listNPCS() {
-    return ImmutableList.copyOf(npcs);
+    return ImmutableList.copyOf(NPCS);
   }
 }

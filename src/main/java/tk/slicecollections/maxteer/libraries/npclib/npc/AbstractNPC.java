@@ -12,13 +12,12 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import tk.slicecollections.maxteer.libraries.npclib.NPCLibrary;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
-import tk.slicecollections.maxteer.libraries.npclib.api.event.NPCDespawnEvent;
-import tk.slicecollections.maxteer.libraries.npclib.api.event.NPCNeedsRespawnEvent;
-import tk.slicecollections.maxteer.libraries.npclib.api.event.NPCSpawnEvent;
+import tk.slicecollections.maxteer.libraries.npclib.api.EntityController;
+import tk.slicecollections.maxteer.libraries.npclib.api.event.*;
 import tk.slicecollections.maxteer.libraries.npclib.api.metadata.MetadataStore;
 import tk.slicecollections.maxteer.libraries.npclib.api.metadata.SimpleMetadataStore;
-import tk.slicecollections.maxteer.libraries.npclib.api.npc.EntityController;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPCAnimation;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.libraries.npclib.trait.CurrentLocation;
 import tk.slicecollections.maxteer.libraries.npclib.trait.NPCTrait;
@@ -196,6 +195,12 @@ public class AbstractNPC implements NPC {
   }
 
   @Override
+  public void playAnimation(NPCAnimation animation) {
+    Preconditions.checkState(isSpawned(), "O npc nao esta spawnado!");
+    NMS.playAnimation(this.getEntity(), animation);
+  }
+
+  @Override
   public void addTrait(NPCTrait trait) {
     traits.put(trait.getClass(), trait);
     trait.onAttach();
@@ -221,15 +226,46 @@ public class AbstractNPC implements NPC {
     }
   }
 
+  private Entity following;
+  private boolean navigating;
+  private Location walkingTo;
+
+  public void finishNavigation() {
+    Bukkit.getPluginManager().callEvent(new NPCNavigationEndEvent(this));
+    this.navigating = false;
+  }
+
+  @Override
+  public void setFollowing(Entity entity) {
+    Preconditions.checkState(!this.navigating, "O npc ja esta andando para um local!");
+    if (this.following != null) {
+      Bukkit.getPluginManager().callEvent(new NPCStopFollowingEvent(this, this.following));
+    }
+    this.following = entity;
+  }
+
+  @Override
+  public void setWalkingTo(Location location) {
+    Preconditions.checkState(this.following == null, "O npc ja esta seguindo uma entidade!");
+    if (location == null) {
+      this.walkingTo = null;
+      return;
+    }
+    Preconditions.checkState(!this.navigating, "O npc ja esta andando para um local!");
+
+    this.navigating = true;
+    this.walkingTo = location;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T extends NPCTrait> T getTrait(Class<T> traitClass) {
-    return (T) traits.get(traitClass);
+    return (T) this.traits.get(traitClass);
   }
 
   @Override
   public boolean isSpawned() {
-    return controller != null && controller.getBukkitEntity() != null && controller.getBukkitEntity().isValid();
+    return this.controller != null && this.controller.getBukkitEntity() != null && this.controller.getBukkitEntity().isValid();
   }
 
   @Override
@@ -238,22 +274,39 @@ public class AbstractNPC implements NPC {
   }
 
   @Override
+  public boolean isNavigating() {
+    return this.navigating;
+  }
+
+  @Override
   public Entity getEntity() {
-    return controller.getBukkitEntity();
+    return this.controller.getBukkitEntity();
+  }
+
+  @Override
+  public Entity getFollowing() {
+    return this.following;
+  }
+
+  @Override
+  public Location getWalkingTo() {
+    return this.walkingTo;
   }
 
   @Override
   public Location getCurrentLocation() {
-    return getTrait(CurrentLocation.class).getLocation().getWorld() != null ? getTrait(CurrentLocation.class).getLocation() : isSpawned() ? getEntity().getLocation() : null;
+    return this.getTrait(CurrentLocation.class).getLocation().getWorld() != null ?
+      this.getTrait(CurrentLocation.class).getLocation() :
+      this.isSpawned() ? this.getEntity().getLocation() : null;
   }
 
   @Override
   public UUID getUUID() {
-    return uuid;
+    return this.uuid;
   }
 
   @Override
   public String getName() {
-    return name;
+    return this.name;
   }
 }

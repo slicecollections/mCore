@@ -125,7 +125,8 @@ public class Profile {
 
         if (!playingGame() && !profile.playingGame()) {
           boolean friend = FriendsHook.isFriend(player.getName(), players.getName());
-          if ((this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(players).isAlwaysVisible() || friend) && !FriendsHook.isBlacklisted(player.getName(), players.getName())) {
+          if ((this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(players).isAlwaysVisible() || friend) && !FriendsHook
+            .isBlacklisted(player.getName(), players.getName())) {
             if (!player.canSee(players)) {
               TitleManager.show(this, profile);
             }
@@ -137,7 +138,8 @@ public class Profile {
             player.hidePlayer(players);
           }
 
-          if ((profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(player).isAlwaysVisible() || friend) && !FriendsHook.isBlacklisted(players.getName(), player.getName())) {
+          if ((profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(player).isAlwaysVisible() || friend) && !FriendsHook
+            .isBlacklisted(players.getName(), player.getName())) {
             if (!players.canSee(player)) {
               TitleManager.show(profile, this);
             }
@@ -192,7 +194,7 @@ public class Profile {
   }
 
   public Player getPlayer() {
-    return Bukkit.getPlayerExact(this.name);
+    return this.name == null ? null : Bukkit.getPlayerExact(this.name);
   }
 
   public Game<?> getGame() {
@@ -201,7 +203,11 @@ public class Profile {
 
   @SuppressWarnings("unchecked")
   public <T extends Game<?>> T getGame(Class<T> gameClass) {
-    return (T) this.game;
+    if (this.game != null && gameClass.isAssignableFrom(this.game.getClass())) {
+      return (T) this.game;
+    }
+
+    return null;
   }
 
   public Hotbar getHotbar() {
@@ -213,11 +219,8 @@ public class Profile {
   }
 
   public List<Profile> getLastHitters() {
-    List<Profile> hitters = this.lastHit.entrySet().stream()
-      .filter(entry -> isOnline(entry.getKey()))
-      .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-      .map(entry -> getProfile(entry.getKey()))
-      .collect(Collectors.toList());
+    List<Profile> hitters = this.lastHit.entrySet().stream().filter(entry -> isOnline(entry.getKey())).sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+      .map(entry -> getProfile(entry.getKey())).collect(Collectors.toList());
     // limpar após uso
     this.lastHit.clear();
     return hitters;
@@ -246,7 +249,7 @@ public class Profile {
   public void updateDailyStats(String table, String date, long amount, String key) {
     long currentExpire = this.getStats(table, date);
     this.setStats(table, System.currentTimeMillis(), date);
-    if ((amount == 0 || this.getStats(table, key) > 0) && (!COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire)))) {
+    if (amount == 0 || (this.getStats(table, key) > 0 && !COMPARE_SDF.format(System.currentTimeMillis()).equals(COMPARE_SDF.format(currentExpire)))) {
       this.setStats(table, 0, key);
       return;
     }

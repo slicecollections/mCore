@@ -14,14 +14,15 @@ import tk.slicecollections.maxteer.cmd.Commands;
 import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.deliveries.Delivery;
 import tk.slicecollections.maxteer.hook.MCoreExpansion;
+import tk.slicecollections.maxteer.hook.protocollib.FakeAdapter;
+import tk.slicecollections.maxteer.hook.protocollib.NPCAdapter;
 import tk.slicecollections.maxteer.libraries.MinecraftVersion;
 import tk.slicecollections.maxteer.libraries.holograms.HologramLibrary;
 import tk.slicecollections.maxteer.libraries.npclib.NPCLibrary;
 import tk.slicecollections.maxteer.listeners.Listeners;
+import tk.slicecollections.maxteer.listeners.PluginMessageListener;
 import tk.slicecollections.maxteer.nms.NMS;
 import tk.slicecollections.maxteer.player.Profile;
-import tk.slicecollections.maxteer.player.fake.FakeAdapter;
-import tk.slicecollections.maxteer.listeners.PluginMessageListener;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.MPlugin;
 import tk.slicecollections.maxteer.plugin.config.MConfig;
@@ -88,6 +89,7 @@ public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginM
     Listeners.setupListeners();
 
     ProtocolLibrary.getProtocolManager().addPacketListener(new FakeAdapter());
+    ProtocolLibrary.getProtocolManager().addPacketListener(new NPCAdapter());
 
     getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
     getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);

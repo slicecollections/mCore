@@ -7,22 +7,22 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerLoginEvent.Result;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.player.Profile;
+import tk.slicecollections.maxteer.player.enums.PrivateMessages;
+import tk.slicecollections.maxteer.player.enums.ProtectionLobby;
 import tk.slicecollections.maxteer.player.fake.FakeManager;
 import tk.slicecollections.maxteer.player.hotbar.HotbarButton;
 import tk.slicecollections.maxteer.plugin.logger.MLogger;
+import tk.slicecollections.maxteer.reflection.Accessors;
 import tk.slicecollections.maxteer.titles.TitleManager;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
 import tk.slicecollections.maxteer.utils.enums.EnumSound;
@@ -38,16 +38,25 @@ public class Listeners implements Listener {
 
   public static final MLogger LOGGER = ((MLogger) Core.getInstance().getLogger()).getModule("Listeners");
   public static final Map<String, Long> DELAY_PLAYERS = new HashMap<>();
+  private static final Map<String, Long> PROTECTION_LOBBY = new HashMap<>();
+
+  private final boolean blockTell, blockLobby;
+
+  public Listeners() {
+    Map<?, ?> map = Accessors.getField(SimpleCommandMap.class, "knownCommands", Map.class).get(Accessors.getMethod(Bukkit.getServer().getClass(), "getCommandMap").invoke(Bukkit.getServer()));
+    blockTell = map.containsKey("tell");
+    blockLobby = map.containsKey("lobby");
+  }
 
   public static void setupListeners() {
     Bukkit.getPluginManager().registerEvents(new Listeners(), Core.getInstance());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerLogin(PlayerLoginEvent evt) {
-    LOGGER.run(Level.SEVERE, "Could not pass PlayerLoginEvent for ${n} v${v}", () -> {
-      if (evt.getResult() == Result.ALLOWED) {
-        Profile.createOrLoadProfile(evt.getPlayer().getName());
+  public void onPlayerLogin(AsyncPlayerPreLoginEvent evt) {
+    LOGGER.run(Level.SEVERE, "Could not pass AsyncPlayerPreLoginEvent for ${n} v${v}", () -> {
+      if (evt.getResult() == PlayerPreLoginEvent.Result.ALLOWED) {
+        Profile.createOrLoadProfile(evt.getName());
       }
     });
   }
@@ -84,9 +93,8 @@ public class Listeners implements Listener {
       if (profile != null) {
         if (profile.getGame() != null) {
           profile.getGame().leave(profile, profile.getGame());
-        } else {
-          TitleManager.leaveServer(profile);
         }
+        TitleManager.leaveServer(profile);
         profile.save();
         profile.destroy();
       }
@@ -95,7 +103,54 @@ public class Listeners implements Listener {
         FakeManager.removeFake(evt.getPlayer());
       }
       DELAY_PLAYERS.remove(evt.getPlayer().getName());
+      PROTECTION_LOBBY.remove(evt.getPlayer().getName().toLowerCase());
     });
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent evt) {
+    Player player = evt.getPlayer();
+    Profile profile = Profile.getProfile(player.getName());
+
+    if (profile != null) {
+      String[] args = evt.getMessage().replace("/", "").split(" ");
+
+      String command = args[0];
+      if (blockLobby && command.equals("lobby") && profile.getPreferencesContainer().getProtectionLobby() == ProtectionLobby.ATIVADO) {
+        long last = PROTECTION_LOBBY.getOrDefault(player.getName().toLowerCase(), 0L);
+        if (last > System.currentTimeMillis()) {
+          PROTECTION_LOBBY.remove(player.getName().toLowerCase());
+          return;
+        }
+
+        evt.setCancelled(true);
+        PROTECTION_LOBBY.put(player.getName().toLowerCase(), System.currentTimeMillis() + 3000);
+        player.sendMessage("§aVocê tem certeza? Utilize /lobby novamente para voltar ao lobby.");
+      } else if (blockTell && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
+        profile = Profile.getProfile(args[1]);
+        if (profile != null && profile.getPreferencesContainer().getPrivateMessages() != PrivateMessages.TODOS) {
+          evt.setCancelled(true);
+          player.sendMessage("§cEste usuário desativou as mensagens privadas.");
+        }
+      }
+    }
+  }
+
+  @EventHandler
+  public void onPlayerInteract(PlayerInteractEvent evt) {
+    Player player = evt.getPlayer();
+    Profile profile = Profile.getProfile(player.getName());
+
+    if (profile != null && profile.getHotbar() != null) {
+      ItemStack item = player.getItemInHand();
+      if (evt.getAction().name().contains("CLICK") && item != null && item.hasItemMeta()) {
+        HotbarButton button = profile.getHotbar().compareButton(player, item);
+        if (button != null) {
+          evt.setCancelled(true);
+          button.getAction().execute(profile);
+        }
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
@@ -114,23 +169,6 @@ public class Listeners implements Listener {
               button.getAction().execute(profile);
             }
           }
-        }
-      }
-    }
-  }
-
-  @EventHandler
-  public void onPlayerInteract(PlayerInteractEvent evt) {
-    Player player = evt.getPlayer();
-    Profile profile = Profile.getProfile(player.getName());
-
-    if (profile != null && profile.getHotbar() != null) {
-      ItemStack item = player.getItemInHand();
-      if (evt.getAction().name().contains("CLICK") && item != null && item.hasItemMeta()) {
-        HotbarButton button = profile.getHotbar().compareButton(player, item);
-        if (button != null) {
-          evt.setCancelled(true);
-          button.getAction().execute(profile);
         }
       }
     }

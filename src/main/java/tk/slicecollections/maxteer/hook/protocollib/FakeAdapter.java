@@ -1,4 +1,4 @@
-package tk.slicecollections.maxteer.player.fake;
+package tk.slicecollections.maxteer.hook.protocollib;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
@@ -8,6 +8,7 @@ import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import tk.slicecollections.maxteer.Core;
+import tk.slicecollections.maxteer.player.fake.FakeManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

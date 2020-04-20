@@ -35,9 +35,9 @@ public class BukkitUtils {
   /**
    * Todas as cores prontas da classe {@link Color}
    */
-  private static final List<FieldAccessor<Color>> COLORS;
-  private static final MethodAccessor GET_PROFILE;
-  private static final FieldAccessor<GameProfile> SKULL_META_PROFILE;
+  public static final List<FieldAccessor<Color>> COLORS;
+  public static final MethodAccessor GET_PROFILE;
+  public static final FieldAccessor<GameProfile> SKULL_META_PROFILE;
 
   static {
     COLORS = new ArrayList<>();

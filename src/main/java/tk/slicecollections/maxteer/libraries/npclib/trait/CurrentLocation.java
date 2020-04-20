@@ -1,7 +1,7 @@
 package tk.slicecollections.maxteer.libraries.npclib.trait;
 
 import org.bukkit.Location;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 
 /**
  * @author Maxter

@@ -9,7 +9,7 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.libraries.npclib.NPCLibrary;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.AbstractEntityController;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.NMS;

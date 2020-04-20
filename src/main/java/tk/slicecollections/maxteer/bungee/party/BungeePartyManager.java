@@ -1,5 +1,6 @@
 package tk.slicecollections.maxteer.bungee.party;
 
+import com.google.common.collect.ImmutableList;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
@@ -18,7 +19,7 @@ public class BungeePartyManager {
     BungeeParty bp = new BungeeParty(leader.getName(), BungeePartySizer.getPartySize(leader));
     BUNGEE_PARTIES.add(bp);
     if (CLEAN_PARTIES == null) {
-      CLEAN_PARTIES = ProxyServer.getInstance().getScheduler().schedule(Bungee.getInstance(), () -> BUNGEE_PARTIES.forEach(BungeeParty::update), 0L, 2L, TimeUnit.SECONDS);
+      CLEAN_PARTIES = ProxyServer.getInstance().getScheduler().schedule(Bungee.getInstance(), () -> ImmutableList.copyOf(BUNGEE_PARTIES).forEach(BungeeParty::update), 0L, 2L, TimeUnit.SECONDS);
     }
 
     return bp;

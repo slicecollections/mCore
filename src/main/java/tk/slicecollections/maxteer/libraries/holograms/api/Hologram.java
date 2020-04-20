@@ -1,5 +1,6 @@
 package tk.slicecollections.maxteer.libraries.holograms.api;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class Hologram {
       return this;
     }
 
-    lines.values().forEach(HologramLine::spawn);
+    this.lines.values().forEach(HologramLine::spawn);
     this.spawned = true;
     return this;
   }
@@ -37,44 +38,48 @@ public class Hologram {
       return this;
     }
 
-    lines.values().forEach(HologramLine::despawn);
+    this.lines.values().forEach(HologramLine::despawn);
     this.spawned = false;
     return this;
   }
 
   public Hologram withLine(String line) {
     int l = 1;
-    while (lines.containsKey(l)) {
+    while (this.lines.containsKey(l)) {
       l++;
     }
 
-    this.lines.put(l, new HologramLine(this, location.clone().add(0, 0.33 * l, 0), line));
+    this.lines.put(l, new HologramLine(this, this.location.clone().add(0, 0.33 * l, 0), line));
     if (spawned) {
-      lines.get(l).spawn();
+      this.lines.get(l).spawn();
     }
 
     return this;
   }
 
   public Hologram updateLine(int id, String line) {
-    if (!lines.containsKey(id)) {
+    if (!this.lines.containsKey(id)) {
       return this;
     }
 
-    HologramLine hl = lines.get(id);
+    HologramLine hl = this.lines.get(id);
     hl.setLine(line);
     return this;
   }
   
   public boolean isSpawned() {  
-    return spawned;
+    return this.spawned;
   }
   
   public Location getLocation() {
-    return location;
+    return this.location;
+  }
+
+  public HologramLine getLine(int id) {
+    return this.lines.get(id);
   }
   
-  public List<HologramLine> getLines() {
-    return ImmutableList.copyOf(lines.values());
+  public Collection<HologramLine> getLines() {
+    return this.lines.values();
   }
 }

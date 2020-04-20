@@ -2,8 +2,8 @@ package tk.slicecollections.maxteer.libraries.npclib.npc;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
-import tk.slicecollections.maxteer.libraries.npclib.api.npc.EntityController;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
+import tk.slicecollections.maxteer.libraries.npclib.api.EntityController;
 
 /**
  * @author Maxter

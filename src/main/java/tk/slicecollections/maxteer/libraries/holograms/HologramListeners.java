@@ -4,9 +4,13 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -14,6 +18,11 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
+import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
+import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Maxter
@@ -21,6 +30,7 @@ import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 public class HologramListeners implements Listener {
 
   private Plugin plugin;
+  private final Map<Player, Long> anticlickSpam = new HashMap<>();
   private final ListMultimap<ChunkCoord, Hologram> toRespawn = ArrayListMultimap.create();
 
   public HologramListeners() {
@@ -31,6 +41,34 @@ public class HologramListeners implements Listener {
   public void onPluginDisable(PluginDisableEvent evt) {
     if (this.plugin.equals(evt.getPlugin())) {
       HologramLibrary.unregisterAll();
+    }
+  }
+
+  @EventHandler
+  public void onPlayerQuit(PlayerQuitEvent evt) {
+    anticlickSpam.remove(evt.getPlayer());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerInteractEntity(PlayerInteractEntityEvent evt) {
+    if (evt.getRightClicked().getType() == EntityType.SLIME) {
+      Player player = evt.getPlayer();
+
+      if (evt.getRightClicked() instanceof ISlime && !player.getGameMode().toString().contains("SPECTATOR")) {
+        ISlime slime = (ISlime) evt.getRightClicked();
+
+        Long lastClick = anticlickSpam.get(player);
+        if (lastClick != null && System.currentTimeMillis() - lastClick < 100) {
+          return;
+        }
+
+        anticlickSpam.put(player, System.currentTimeMillis());
+
+        HologramLine line = slime.getLine();
+        if (line != null && line.getTouchHandler() != null) {
+          line.getTouchHandler().onTouch(player);
+        }
+      }
     }
   }
 

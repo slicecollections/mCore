@@ -1,4 +1,6 @@
-# Ative isso caso esteja utilizando o mCore no Bungee para os comandos.
+# Ative isso caso deseja utilizar o cash
+cash: true
+# Ative isso caso esteja utilizando o mCore no Bungee para os comandos: party e fake
 bungeecord: false
 # /fake do mCore
 fake:

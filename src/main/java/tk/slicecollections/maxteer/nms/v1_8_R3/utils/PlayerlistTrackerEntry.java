@@ -1,9 +1,8 @@
 package tk.slicecollections.maxteer.nms.v1_8_R3.utils;
 
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.EntityTrackerEntry;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.entity.Player;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityNPCPlayer;
 
@@ -53,6 +52,11 @@ public class PlayerlistTrackerEntry extends EntityTrackerEntry {
       if (!trackedPlayers.contains(entityplayer) && (entityplayer.u().getPlayerChunkMap().a(entityplayer, tracker.ae, tracker.ag) || tracker.attachedToPlayer)) {
         if (tracker instanceof SkinnableEntity) {
           SkinnableEntity entity = (SkinnableEntity) tracker;
+          NPC npc = entity.getNPC();
+          if (npc.data().has(NPC.ATTACHED_PLAYER) && !npc.data().get(NPC.ATTACHED_PLAYER).equals(entityplayer.getName())) {
+            entityplayer.getBukkitEntity().hidePlayer(entity.getEntity());
+            return;
+          }
 
           Player player = entity.getEntity();
           if (entityplayer.getBukkitEntity().canSee(player)) {

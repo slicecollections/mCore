@@ -55,9 +55,7 @@ public class MLogger extends PluginLogger {
     if (logRecord.getThrown() != null) {
       result.append("\n").append(logRecord.getThrown().getLocalizedMessage());
       for (StackTraceElement ste : logRecord.getThrown().getStackTrace()) {
-        if (ste.toString().contains("tk.slicecollections")) {
-          result.append("\n").append(ste.toString());
-        }
+        result.append("\n").append(ste.toString());
       }
     }
 

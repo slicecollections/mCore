@@ -78,7 +78,7 @@ public class Bungee extends Plugin {
         } else {
           this.roles = YamlConfiguration.getProvider(YamlConfiguration.class).load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         }
-      } catch (FileNotFoundException ex) {
+      } catch (IOException ex) {
         this.getLogger().log(Level.WARNING, "Cannot load " + fileName + ".yml: ", ex);
       }
     }

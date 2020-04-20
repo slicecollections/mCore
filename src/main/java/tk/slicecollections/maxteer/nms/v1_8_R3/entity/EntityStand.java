@@ -132,6 +132,11 @@ public class EntityStand extends EntityArmorStand implements IArmorStand {
     }
 
     @Override
+    public void setBodyPose(EulerAngle pose) {
+      ((EntityStand) entity).setHeadPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
+    }
+
+    @Override
     public void setHeadPose(EulerAngle pose) {
       ((EntityStand) entity).setHeadPose(new Vector3f((float) pose.getX(), (float) pose.getY(), (float) pose.getZ()));
     }

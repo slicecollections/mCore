@@ -1,6 +1,6 @@
 package tk.slicecollections.maxteer.libraries.npclib.trait;
 
-import tk.slicecollections.maxteer.libraries.npclib.api.NPC;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.api.trait.Trait;
 
 /**

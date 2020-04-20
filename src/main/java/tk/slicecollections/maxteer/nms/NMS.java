@@ -1,6 +1,5 @@
 package tk.slicecollections.maxteer.nms;
 
-import java.util.Collection;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -11,11 +10,15 @@ import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.libraries.MinecraftVersion;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
+import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPCAnimation;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.interfaces.INMS;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
+import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
 import tk.slicecollections.maxteer.nms.v1_8_R3.NMS1_8R3;
 import tk.slicecollections.maxteer.plugin.logger.MLogger;
+
+import java.util.Collection;
 
 /**
  * @author Maxter
@@ -29,6 +32,10 @@ public class NMS {
     return BRIDGE.createArmorStand(location, name, line);
   }
 
+  public static ISlime createSlime(Location location, HologramLine line) {
+    return BRIDGE.createSlime(location, line);
+  }
+
   public static Hologram getHologram(Entity entity) {
     return BRIDGE.getHologram(entity);
   }
@@ -36,7 +43,11 @@ public class NMS {
   public static boolean isHologramEntity(Entity entity) {
     return BRIDGE.isHologramEntity(entity);
   }
-  
+
+  public static void playAnimation(Entity entity, NPCAnimation animation) {
+    BRIDGE.playAnimation(entity, animation);
+  }
+
   public static void setValueAndSignature(Player player, String value, String signature) {
     BRIDGE.setValueAndSignature(player, value, signature);
   }
