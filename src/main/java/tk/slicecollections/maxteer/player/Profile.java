@@ -1,5 +1,6 @@
 package tk.slicecollections.maxteer.player;
 
+import com.google.common.collect.ImmutableList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -400,6 +401,6 @@ public class Profile {
   }
 
   public static Collection<Profile> listProfiles() {
-    return PROFILES.values();
+    return ImmutableList.copyOf(PROFILES.values());
   }
 }
