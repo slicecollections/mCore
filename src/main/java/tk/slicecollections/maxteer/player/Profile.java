@@ -47,6 +47,9 @@ public class Profile {
   public Profile(String name) {
     this.name = name;
     this.tableMap = Database.getInstance().load(name);
+    if (this.getDataContainer("mCoreProfile", "cash") == null) {
+      this.getDataContainer("mCoreProfile", "cash").set(0L);
+    }
 
     this.getDataContainer("mCoreProfile", "lastlogin").set(System.currentTimeMillis());
   }
@@ -78,7 +81,7 @@ public class Profile {
   }
 
   public void refresh() {
-    Player player = getPlayer();
+    Player player = this.getPlayer();
     if (player == null) {
       return;
     }
@@ -111,6 +114,10 @@ public class Profile {
 
   public void refreshPlayers() {
     Player player = this.getPlayer();
+    if (player == null) {
+      return;
+    }
+
     if (this.hotbar != null) {
       this.hotbar.getButtons().forEach(button -> {
         if (button.getAction().getValue().equalsIgnoreCase("jogadores")) {
@@ -122,6 +129,9 @@ public class Profile {
     if (!this.playingGame()) {
       Profile.listProfiles().forEach(profile -> {
         Player players = profile.getPlayer();
+        if (players == null) {
+          return;
+        }
 
         if (!playingGame() && !profile.playingGame()) {
           boolean friend = FriendsHook.isFriend(player.getName(), players.getName());
@@ -207,7 +217,7 @@ public class Profile {
       return (T) this.game;
     }
 
-    return null;
+    return this.game != null && gameClass.isAssignableFrom(this.game.getClass()) ? (T) this.game : null;
   }
 
   public Hotbar getHotbar() {
@@ -356,7 +366,7 @@ public class Profile {
   private static final SimpleDateFormat COMPARE_SDF = new SimpleDateFormat("yyyy/MM/dd");
 
   public static Profile createOrLoadProfile(String playerName) {
-    Profile profile = PROFILES.get(playerName.toLowerCase());
+    Profile profile = PROFILES.getOrDefault(playerName.toLowerCase(), null);
     if (profile == null) {
       profile = new Profile(playerName);
       PROFILES.put(playerName.toLowerCase(), profile);
@@ -366,7 +376,7 @@ public class Profile {
   }
 
   public static Profile loadIfExists(String playerName) {
-    Profile profile = PROFILES.get(playerName.toLowerCase());
+    Profile profile = PROFILES.getOrDefault(playerName.toLowerCase(), null);
     if (profile == null) {
       playerName = Database.getInstance().exists(playerName);
       if (playerName != null) {

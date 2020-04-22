@@ -112,6 +112,9 @@ public abstract class Party {
 
   public void transfer(String name) {
     PartyPlayer newLeader = this.getPlayer(name);
+    if (newLeader == null) {
+      return;
+    }
     this.leader.setRole(newLeader.getRole());
     newLeader.setRole(LEADER);
     this.leader = newLeader;
