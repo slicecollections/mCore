@@ -41,7 +41,7 @@ import java.util.List;
 public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginMessageListener {
 
   private static Core instance;
-  private static boolean validInit;
+  public static boolean validInit;
   public static final List<String> minigames = Arrays.asList("Sky Wars", "The Bridge");
   public static String minigame = "";
 

@@ -55,11 +55,17 @@ public class Listeners implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent evt) {
-    LOGGER.run(Level.SEVERE, "Could not pass AsyncPlayerPreLoginEvent for ${n} v${v}", () -> {
-      if (evt.getResult() == PlayerPreLoginEvent.Result.ALLOWED) {
-        Profile.createOrLoadProfile(evt.getName());
-      }
-    });
+    if (evt.getResult() == PlayerPreLoginEvent.Result.ALLOWED) {
+      Profile.createOrLoadProfile(evt.getName());
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerLoginMonitor(PlayerLoginEvent evt) {
+    if (Profile.getProfile(evt.getPlayer().getName()) == null) {
+      evt.disallow(PlayerLoginEvent.Result.KICK_OTHER,
+        " \n§cAparentemente o servidor não conseguiu carregar seu Perfil.\n \n§cIsso ocorre normalmente quando o servidor ainda está despreparado para receber logins, aguarde um pouco e tente novamente.");
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
