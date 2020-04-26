@@ -6,7 +6,7 @@
 
     <groupId>tk.slicecollections.maxteer</groupId>
     <artifactId>mCore</artifactId>
-    <version>2.3</version>
+    <version>2.4</version>
 
     <properties>
         <main-bukkit>tk.slicecollections.maxteer.Core</main-bukkit>
@@ -40,6 +40,11 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.2</version>
+        </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
@@ -85,7 +90,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!-- <outputFile>D:\Database\Servidores\mthebridge\plugins\${project.artifactId}.jar</outputFile> -->
+                            <!-- <outputFile>D:\Database\Servidores\mskywars\plugins\${project.artifactId}.jar</outputFile> -->
                             <outputFile>D:\Database\SliceCollections\${project.artifactId}.jar</outputFile>
                             <artifactSet>
                                 <excludes>

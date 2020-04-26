@@ -105,6 +105,7 @@ public class Profile {
       player.teleport(Core.getLobby());
 
       player.setAllowFlight(player.hasPermission("mcore.fly"));
+      this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(player, true).getName()));
     }
 
     if (this.hotbar != null) {
@@ -170,14 +171,10 @@ public class Profile {
   }
 
   public void save() {
-    // Salvar o último rank para utilização em funções offline como "LeaderBoards"
-    this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(this.getPlayer(), true).getName()));
     Database.getInstance().save(this.name, this.tableMap);
   }
 
   public void saveSync() {
-    // Salvar o último rank para utilização em funções offline como "LeaderBoards"
-    this.getDataContainer("mCoreProfile", "role").set(StringUtils.stripColors(Role.getPlayerRole(this.getPlayer(), true).getName()));
     Database.getInstance().saveSync(this.name, this.tableMap);
   }
 

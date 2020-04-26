@@ -21,11 +21,13 @@ public class TitleManager {
     }
 
     Player player = profile.getPlayer();
-    this.controllers.values().forEach(controller -> {
-      if (player.canSee(controller.getOwner())) {
-        controller.showToPlayer(player);
-      }
-    });
+    if (player != null) {
+      this.controllers.values().forEach(controller -> {
+        if (controller.getOwner() != null && player.canSee(controller.getOwner())) {
+          controller.showToPlayer(player);
+        }
+      });
+    }
 
     TitleController controller = this.getTitleController(profile);
     if (controller != null) {
@@ -45,11 +47,13 @@ public class TitleManager {
     }
 
     Player player = profile.getPlayer();
-    this.controllers.values().forEach(c -> {
-      if (player.canSee(c.getOwner())) {
-        c.hideToPlayer(player);
-      }
-    });
+    if (player != null) {
+      this.controllers.values().forEach(c -> {
+        if (c.getOwner() != null && player.canSee(c.getOwner())) {
+          c.hideToPlayer(player);
+        }
+      });
+    }
   }
 
   public void onLeaveServer(Profile profile) {
@@ -64,7 +68,7 @@ public class TitleManager {
     TitleController controller = this.getTitleController(target);
     if (controller != null) {
       Bukkit.getScheduler().scheduleSyncDelayedTask(Core.getInstance(), () -> {
-        if (player.canSee(controller.getOwner())) {
+        if (controller.getOwner() != null && player.isOnline() && player.canSee(controller.getOwner())) {
           controller.showToPlayer(player);
         }
       }, 10);

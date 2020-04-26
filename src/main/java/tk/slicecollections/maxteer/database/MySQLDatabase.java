@@ -1,5 +1,7 @@
 package tk.slicecollections.maxteer.database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
 
@@ -7,10 +9,8 @@ import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetProvider;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -25,7 +25,7 @@ public class MySQLDatabase extends Database {
   private String username;
   private String password;
 
-  private Connection connection;
+  private HikariDataSource dataSource;
   private ExecutorService executor;
 
   public MySQLDatabase(String host, String port, String dbname, String username, String password) {
@@ -109,59 +109,57 @@ public class MySQLDatabase extends Database {
   }
 
   public void openConnection() {
-    try {
-      boolean reconnected = true;
-      if (this.connection == null) {
-        reconnected = false;
-      }
-      this.connection = DriverManager
-        .getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbname + "?verifyServerCertificate=false&useSSL=false&useUnicode=yes&characterEncoding=UTF-8", username,
-          password);
-      if (reconnected) {
-        LOGGER.info("Reconectado ao MySQL!");
-        return;
-      }
+    HikariConfig config = new HikariConfig();
+    config.setPoolName("mCoreConnectionPool");
+    config.setMaximumPoolSize(32);
+    config.setConnectionTimeout(30000L);
+    config.setDriverClassName("com.mysql.jdbc.Driver");
+    config.setJdbcUrl("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.dbname);
+    config.setUsername(this.username);
+    config.setPassword(this.password);
+    config.addDataSourceProperty("autoReconnect", "true");
+    this.dataSource = new HikariDataSource(config);
 
-      LOGGER.info("Conectado ao MySQL!");
-    } catch (SQLException ex) {
-      LOGGER.log(Level.SEVERE, "Nao foi possivel se conectar ao MySQL: ", ex);
-    }
+    LOGGER.info("Conectado ao MySQL!");
   }
 
   public void closeConnection() {
     if (isConnected()) {
-      try {
-        connection.close();
-      } catch (SQLException e) {
-        LOGGER.log(Level.WARNING, "Nao foi possivel fechar a conexao com o MySQL: ", e);
-      }
+      this.dataSource.close();
     }
   }
 
-  public Connection getConnection() {
-    if (!isConnected()) {
-      this.openConnection();
-    }
-
-    return connection;
+  public Connection getConnection() throws SQLException {
+    return this.dataSource.getConnection();
   }
 
   public boolean isConnected() {
-    try {
-      return !(connection == null || connection.isClosed() || !connection.isValid(5));
-    } catch (SQLException ex) {
-      LOGGER.log(Level.SEVERE, "Nao foi possivel verificar a conexao com o MySQL: ", ex);
-      return false;
-    }
+    return !this.dataSource.isClosed();
   }
 
   public void update(String sql, Object... vars) {
+    Connection connection = null;
+    PreparedStatement ps = null;
     try {
-      PreparedStatement ps = prepareStatement(sql, vars);
-      ps.execute();
-      ps.close();
+      connection = getConnection();
+      ps = connection.prepareStatement(sql);
+      for (int i = 0; i < vars.length; i++) {
+        ps.setObject(i + 1, vars[i]);
+      }
+      ps.executeUpdate();
     } catch (SQLException ex) {
       LOGGER.log(Level.WARNING, "Nao foi possivel executar um SQL: ", ex);
+    } finally {
+      try {
+        if (connection != null && !connection.isClosed()) connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      try {
+        if (ps != null && !ps.isClosed()) ps.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
   }
 
@@ -173,73 +171,81 @@ public class MySQLDatabase extends Database {
 
   public int updateWithInsertId(String sql, Object... vars) {
     int id = -1;
+    Connection connection = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
     try {
-      PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      connection = getConnection();
+      ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       for (int i = 0; i < vars.length; i++) {
         ps.setObject(i + 1, vars[i]);
       }
       ps.execute();
-      ResultSet rs = ps.getGeneratedKeys();
+      rs = ps.getGeneratedKeys();
       if (rs.next()) {
         id = rs.getInt(1);
       }
-      rs.close();
-      ps.close();
     } catch (SQLException ex) {
       LOGGER.log(Level.WARNING, "Nao foi possivel executar um SQL: ", ex);
+    } finally {
+      try {
+        if (connection != null && !connection.isClosed()) connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      try {
+        if (ps != null && !ps.isClosed()) ps.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      try {
+        if (rs != null && !rs.isClosed()) rs.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
 
     return id;
   }
 
-  public PreparedStatement prepareStatement(String query, Object... vars) {
+  public CachedRowSet query(String query, Object... vars) {
+    Connection connection = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    CachedRowSet rowSet = null;
     try {
-      PreparedStatement ps = getConnection().prepareStatement(query);
+      connection = getConnection();
+      ps = connection.prepareStatement(query);
       for (int i = 0; i < vars.length; i++) {
         ps.setObject(i + 1, vars[i]);
       }
-      return ps;
+      rs = ps.executeQuery();
+      rowSet = RowSetProvider.newFactory().createCachedRowSet();
+      rowSet.populate(rs);
+
+      if (rowSet.next()) {
+        return rowSet;
+      }
     } catch (SQLException ex) {
-      LOGGER.log(Level.WARNING, "Nao foi possivel preparar um SQL: ", ex);
+      LOGGER.log(Level.WARNING, "Nao foi possivel executar um Requisicao: ", ex);
+    } finally {
+      try {
+        if (connection != null && !connection.isClosed()) connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      try {
+        if (ps != null && !ps.isClosed()) ps.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      try {
+        if (rs != null && !rs.isClosed()) rs.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
 
     return null;
-  }
-
-  public CachedRowSet query(String query, Object... vars) {
-    CachedRowSet rowSet = null;
-    try {
-      Future<CachedRowSet> future = executor.submit(new Callable<CachedRowSet>() {
-
-        @Override
-        public CachedRowSet call() {
-          try {
-            PreparedStatement ps = prepareStatement(query, vars);
-
-            ResultSet rs = ps.executeQuery();
-            CachedRowSet crs = RowSetProvider.newFactory().createCachedRowSet();
-            crs.populate(rs);
-            rs.close();
-            ps.close();
-
-            if (crs.next()) {
-              return crs;
-            }
-          } catch (SQLException ex) {
-            LOGGER.log(Level.WARNING, "Nao foi possivel executar um Requisicao: ", ex);
-          }
-
-          return null;
-        }
-      });
-
-      if (future.get() != null) {
-        rowSet = future.get();
-      }
-    } catch (Exception ex) {
-      LOGGER.log(Level.WARNING, "Nao foi possivel chamar uma Futura Tarefa: ", ex);
-    }
-
-    return rowSet;
   }
 }

@@ -56,8 +56,7 @@ public class CubeID implements Iterable<Block> {
   public Location getCenterLocation() {
     double x = xmin + ((xmax + 1) - xmin) / 2.0, z = zmin + ((zmax + 1) - zmin) / 2.0;
     World world = Bukkit.getWorld(this.world);
-    int y = world.getHighestBlockYAt((int) x, (int) z);
-    return new Location(world, x, y, z);
+    return new Location(world, x, ymax - 10, z);
   }
 
   public boolean contains(Location loc) {

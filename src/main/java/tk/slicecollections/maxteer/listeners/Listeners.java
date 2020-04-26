@@ -43,7 +43,8 @@ public class Listeners implements Listener {
   private final boolean blockTell, blockLobby;
 
   public Listeners() {
-    Map<?, ?> map = Accessors.getField(SimpleCommandMap.class, "knownCommands", Map.class).get(Accessors.getMethod(Bukkit.getServer().getClass(), "getCommandMap").invoke(Bukkit.getServer()));
+    Map<?, ?> map =
+      Accessors.getField(SimpleCommandMap.class, "knownCommands", Map.class).get(Accessors.getMethod(Bukkit.getServer().getClass(), "getCommandMap").invoke(Bukkit.getServer()));
     blockTell = map.containsKey("tell");
     blockLobby = map.containsKey("lobby");
   }
@@ -53,7 +54,7 @@ public class Listeners implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerLogin(AsyncPlayerPreLoginEvent evt) {
+  public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent evt) {
     LOGGER.run(Level.SEVERE, "Could not pass AsyncPlayerPreLoginEvent for ${n} v${v}", () -> {
       if (evt.getResult() == PlayerPreLoginEvent.Result.ALLOWED) {
         Profile.createOrLoadProfile(evt.getName());
