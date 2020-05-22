@@ -38,6 +38,8 @@ public class DeliveryReward {
   public void dispatch(Profile profile) {
     if (this.type == RewardType.COMANDO) {
       Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ((String) this.values[0]).replace("{name}", profile.getName()));
+    } else if (this.type == RewardType.CASH) {
+      profile.setStats("mCoreProfile", profile.getStats("mCoreProfile", "cash") + (long) this.values[0], "cash");
     } else if (this.type.name().contains("_COINS")) {
       profile.addCoins("mCore" + this.type.name().replace("_COINS", ""), (double) this.values[0]);
     } else if (this.type.name().contains("_BOOSTER")) {
@@ -49,6 +51,7 @@ public class DeliveryReward {
 
   private enum RewardType {
     COMANDO(1),
+    CASH(1),
     SkyWars_COINS(1),
     TheBridge_COINS(1),
     PRIVATE_BOOSTER(3),
@@ -67,6 +70,8 @@ public class DeliveryReward {
     public Object[] parseValues(String value) throws Exception {
       if (this == COMANDO) {
         return new Object[] {value};
+      } else if (this == CASH) {
+        return new Object[] {Long.parseLong(value)};
       } else if (this.name().contains("_COINS")) {
         return new Object[] {Double.parseDouble(value)};
       } else if (this.name().contains("_BOOSTER")) {

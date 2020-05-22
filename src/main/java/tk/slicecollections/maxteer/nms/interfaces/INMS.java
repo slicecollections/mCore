@@ -26,6 +26,8 @@ public interface INMS {
 
   Hologram getHologram(Entity entity);
 
+  Hologram getPreHologram(int entityId);
+
   boolean isHologramEntity(Entity entity);
 
   void playAnimation(Entity entity, NPCAnimation animation);

@@ -40,6 +40,10 @@ public class NMS {
     return BRIDGE.getHologram(entity);
   }
 
+  public static Hologram getPreHologram(int entityId) {
+    return BRIDGE.getPreHologram(entityId);
+  }
+
   public static boolean isHologramEntity(Entity entity) {
     return BRIDGE.isHologramEntity(entity);
   }

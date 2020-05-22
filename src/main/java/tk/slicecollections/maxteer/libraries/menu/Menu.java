@@ -17,7 +17,6 @@ public class Menu {
 
   private Inventory inventory;
   private List<Integer> slots = new ArrayList<>();
-  private Map<Integer, Object> attached = new HashMap<>();
 
   public Menu() {
     this("", 1);
@@ -28,14 +27,10 @@ public class Menu {
   }
 
   public Menu(String title, int rows) {
-    this.inventory = Bukkit.createInventory(null, rows > 6 || rows < 1 ? 9 : rows * 9, title);
+    this.inventory = Bukkit.createInventory(null, Math.min(Math.max(1, rows), 6) * 9, title);
     for (int i = 0; i < this.inventory.getSize(); i++) {
       this.slots.add(i);
     }
-  }
-
-  public void attachObject(int slot, Object value) {
-    this.attached.put(slot, value);
   }
 
   public void setItem(int slot, ItemStack item) {
@@ -67,10 +62,6 @@ public class Menu {
 
   public ItemStack getItem(int slot) {
     return this.inventory.getItem(slot);
-  }
-
-  public Object getAttached(int slot) {
-    return this.attached.get(slot);
   }
 
   public ItemStack[] getContents() {

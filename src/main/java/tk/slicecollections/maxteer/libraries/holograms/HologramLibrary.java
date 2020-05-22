@@ -27,7 +27,7 @@ public class HologramLibrary {
   private static final List<Hologram> holograms = new ArrayList<>();
 
   public static Hologram createHologram(Location location, List<String> lines) {
-    return createHologram(location, lines.toArray(new String[lines.size()]));
+    return createHologram(location, lines.toArray(new String[0]));
   }
 
   public static Hologram createHologram(Location location, String... lines) {

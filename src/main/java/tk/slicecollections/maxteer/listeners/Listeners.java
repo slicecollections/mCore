@@ -21,8 +21,10 @@ import tk.slicecollections.maxteer.player.enums.PrivateMessages;
 import tk.slicecollections.maxteer.player.enums.ProtectionLobby;
 import tk.slicecollections.maxteer.player.fake.FakeManager;
 import tk.slicecollections.maxteer.player.hotbar.HotbarButton;
+import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.logger.MLogger;
 import tk.slicecollections.maxteer.reflection.Accessors;
+import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.TitleManager;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
 import tk.slicecollections.maxteer.utils.enums.EnumSound;
@@ -72,6 +74,25 @@ public class Listeners implements Listener {
   public void onPlayerJoin(PlayerJoinEvent evt) {
     LOGGER.run(Level.SEVERE, "Could not pass PlayerJoinEvent for ${n} v${v}", () -> {
       Player player = evt.getPlayer();
+      if (!ServerItem.WARNINGS.isEmpty()) {
+        TextComponent component = new TextComponent("");
+        for (BaseComponent components : TextComponent.fromLegacyText(
+          " \n §6§lAVISO IMPORTANTE\n \n §7O sistema de servidores do mCore foi alterado nessa nova versão e, aparentemente você utiliza a versão antiga!\n §7O novo padrão de 'servernames' na servers.yml é 'IP:PORTA ; BungeeServerName' e você utiliza o antigo padrão 'BungeeServerName' nas seguintes entradas:")) {
+          component.addExtra(components);
+        }
+        for (String warning : ServerItem.WARNINGS) {
+          for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
+            component.addExtra(components);
+          }
+        }
+        for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
+          component.addExtra(components);
+        }
+
+        player.spigot().sendMessage(component);
+        EnumSound.ORB_PICKUP.play(player, 1.0F, 1.0F);
+      }
+
       if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload && player.hasPermission("mcore.admin")) {
         TextComponent component = new TextComponent("");
         for (BaseComponent components : TextComponent.fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
@@ -112,6 +133,31 @@ public class Listeners implements Listener {
       DELAY_PLAYERS.remove(evt.getPlayer().getName());
       PROTECTION_LOBBY.remove(evt.getPlayer().getName().toLowerCase());
     });
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onAsyncPlayerChat(AsyncPlayerChatEvent evt) {
+    if (evt.isCancelled()) {
+      return;
+    }
+
+    Player player = evt.getPlayer();
+
+    String format = String.format(evt.getFormat(), player.getName(), evt.getMessage());
+
+    TextComponent component = new TextComponent("");
+    for (BaseComponent components : TextComponent.fromLegacyText(format.replace(" " + evt.getMessage(), ""))) {
+      component.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + player.getName() + " "));
+      component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Role.getColored(player.getName()) + "\n§fGrupo: " + Role.getPlayerRole(player).getName() + "\n \n§eClique para enviar uma mensagem privada.")));
+      component.addExtra(components);
+    }
+
+    for (BaseComponent components : TextComponent.fromLegacyText(" " + evt.getMessage())) {
+      component.addExtra(components);
+    }
+
+    evt.setCancelled(true);
+    evt.getRecipients().forEach(players -> players.spigot().sendMessage(component));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

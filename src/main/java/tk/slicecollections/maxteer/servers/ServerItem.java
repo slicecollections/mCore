@@ -1,9 +1,5 @@
 package tk.slicecollections.maxteer.servers;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.player.Profile;
@@ -11,7 +7,6 @@ import tk.slicecollections.maxteer.plugin.config.MConfig;
 import tk.slicecollections.maxteer.servers.balancer.BaseBalancer;
 import tk.slicecollections.maxteer.servers.balancer.Server;
 import tk.slicecollections.maxteer.servers.balancer.type.LeastConnection;
-import tk.slicecollections.maxteer.servers.balancer.type.MostConnection;
 
 import java.util.*;
 
@@ -36,6 +31,8 @@ public class ServerItem {
     Server server = balancer.next();
     if (server != null) {
       Core.sendServer(profile, server.getName());
+    } else {
+      profile.getPlayer().sendMessage("§cNão foi possível se conectar a esse servidor no momento!");
     }
   }
 
@@ -59,21 +56,28 @@ public class ServerItem {
   public static final MConfig CONFIG = Core.getInstance().getConfig("servers");
   public static final List<Integer> DISABLED_SLOTS = CONFIG.getIntegerList("disabled-slots");
   public static final Map<String, Integer> SERVER_COUNT = new HashMap<>();
+  public static final List<String> WARNINGS = new ArrayList<>();
 
   public static void setupServers() {
     for (String key : CONFIG.getSection("items").getKeys(false)) {
-      ServerItem si = new ServerItem(key, CONFIG.getInt("items." + key + ".slot"), CONFIG.getString("items." + key + ".icon"),
-        key.equalsIgnoreCase("lobby") ? new LeastConnection<>() : new MostConnection<>());
+      ServerItem si = new ServerItem(key, CONFIG.getInt("items." + key + ".slot"), CONFIG.getString("items." + key + ".icon"), new LeastConnection<>());
       SERVERS.add(si);
-      CONFIG.getStringList("items." + key + ".servernames").forEach(server -> si.getBalancer().add(server, new Server(server, CONFIG.getInt("items." + key + ".max-players"))));
+      CONFIG.getStringList("items." + key + ".servernames").forEach(server -> {
+        if (server.split(" ; ").length < 2) {
+          WARNINGS.add(" - (" + key + ") " + server);
+          return;
+        }
+
+        si.getBalancer().add(server, new Server(server.split(" ; ")[0], server.split(" ; ")[1], CONFIG.getInt("items." + key + ".max-players")));
+      });
     }
 
     new BukkitRunnable() {
       @Override
       public void run() {
-        SERVERS.forEach(server -> server.getBalancer().keySet().forEach(ServerItem::writeCount));
+        SERVERS.forEach(server -> server.getBalancer().getList().forEach(Server::fetch));
       }
-    }.runTaskTimer(Core.getInstance(), 0, 40);
+    }.runTaskTimerAsynchronously(Core.getInstance(), 0, 40);
   }
 
   public static Collection<ServerItem> listServers() {
@@ -94,23 +98,5 @@ public class ServerItem {
 
   public static int getServerCount(String servername) {
     return SERVER_COUNT.get(servername) == null ? 0 : SERVER_COUNT.get(servername);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static void writeCount(String server) {
-    Iterator<Player> itr = (Iterator<Player>) Bukkit.getOnlinePlayers().iterator();
-    if (!itr.hasNext()) {
-      return;
-    }
-
-    Player fake = itr.next();
-    if (fake == null) {
-      return;
-    }
-
-    ByteArrayDataOutput out = ByteStreams.newDataOutput();
-    out.writeUTF("PlayerCount");
-    out.writeUTF(server);
-    fake.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
   }
 }

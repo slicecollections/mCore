@@ -135,7 +135,7 @@ public class Profile {
           return;
         }
 
-        if (!playingGame() && !profile.playingGame()) {
+        if (!profile.playingGame()) {
           boolean friend = FriendsHook.isFriend(player.getName(), players.getName());
           if ((this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(players).isAlwaysVisible() || friend) && !FriendsHook
             .isBlacklisted(player.getName(), players.getName())) {

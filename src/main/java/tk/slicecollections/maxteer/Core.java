@@ -1,7 +1,6 @@
 package tk.slicecollections.maxteer;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -15,6 +14,7 @@ import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.deliveries.Delivery;
 import tk.slicecollections.maxteer.hook.MCoreExpansion;
 import tk.slicecollections.maxteer.hook.protocollib.FakeAdapter;
+import tk.slicecollections.maxteer.hook.protocollib.HologramAdapter;
 import tk.slicecollections.maxteer.hook.protocollib.NPCAdapter;
 import tk.slicecollections.maxteer.libraries.MinecraftVersion;
 import tk.slicecollections.maxteer.libraries.holograms.HologramLibrary;
@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * @author Maxter
  */
-public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginMessageListener {
+public class Core extends MPlugin {
 
   private static Core instance;
   public static boolean validInit;
@@ -64,16 +64,15 @@ public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginM
     saveDefaultConfig();
     lobby = Bukkit.getWorlds().get(0).getSpawnLocation();
 
+    // Remove o spawn-protection-size automaticamente
+    if (Bukkit.getSpawnRadius() != 0) {
+      Bukkit.setSpawnRadius(0);
+    }
+
     PlaceholderAPI.registerExpansion(new MCoreExpansion());
 
-    Database.setupDatabase(
-      getConfig().getString("database.tipo"),
-      getConfig().getString("database.mysql.host"),
-      getConfig().getString("database.mysql.porta"),
-      getConfig().getString("database.mysql.nome"),
-      getConfig().getString("database.mysql.usuario"),
-      getConfig().getString("database.mysql.senha")
-    );
+    Database.setupDatabase(getConfig().getString("database.tipo"), getConfig().getString("database.mysql.host"), getConfig().getString("database.mysql.porta"),
+      getConfig().getString("database.mysql.nome"), getConfig().getString("database.mysql.usuario"), getConfig().getString("database.mysql.senha"));
 
     NPCLibrary.setupNPCs(this);
     HologramLibrary.setupHolograms(this);
@@ -90,9 +89,9 @@ public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginM
 
     ProtocolLibrary.getProtocolManager().addPacketListener(new FakeAdapter());
     ProtocolLibrary.getProtocolManager().addPacketListener(new NPCAdapter());
+    ProtocolLibrary.getProtocolManager().addPacketListener(new HologramAdapter());
 
     getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-    getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
     getServer().getMessenger().registerIncomingPluginChannel(this, "mCore", new PluginMessageListener());
 
     Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new SliceUpdater(this, 4).run());
@@ -152,26 +151,12 @@ public class Core extends MPlugin implements org.bukkit.plugin.messaging.PluginM
     return instance;
   }
 
-  @Override
-  public void onPluginMessageReceived(String channel, Player receiver, byte[] msg) {
-    if (channel.equals("BungeeCord")) {
-      ByteArrayDataInput in = ByteStreams.newDataInput(msg);
-
-      String subChannel = in.readUTF();
-      if (subChannel.equals("PlayerCount")) {
-        try {
-          String server = in.readUTF();
-          ServerItem.SERVER_COUNT.put(server, in.readInt());
-        } catch (Exception ignored) {}
-      }
-    }
-  }
-
   public static void sendServer(Profile profile, String name) {
     Player player = profile.getPlayer();
     if (player != null) {
-      profile.saveSync();
       player.closeInventory();
+      profile.saveSync();
+      player.sendMessage("§aConectando...");
       ByteArrayDataOutput out = ByteStreams.newDataOutput();
       out.writeUTF("Connect");
       out.writeUTF(name);

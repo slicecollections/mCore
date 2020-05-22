@@ -32,10 +32,9 @@ import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.interfaces.INMS;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
 import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
-import tk.slicecollections.maxteer.nms.v1_8_R3.entity.*;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityArmorStand;
-import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityArmorStand.CraftArmorStand;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntitySlime;
+import tk.slicecollections.maxteer.nms.v1_8_R3.entity.*;
 import tk.slicecollections.maxteer.nms.v1_8_R3.utils.PlayerlistTrackerEntry;
 import tk.slicecollections.maxteer.nms.v1_8_R3.utils.UUIDMetadataStore;
 import tk.slicecollections.maxteer.reflection.Accessors;
@@ -43,6 +42,7 @@ import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.utils.Utils;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -313,6 +313,8 @@ public class NMS1_8R3 implements INMS {
     }
   }
 
+  private Map<Integer, Hologram> preHologram = new HashMap<>();
+
   @Override
   public IArmorStand createArmorStand(Location location, String name, HologramLine line) {
     IArmorStand armor = line == null ? new EntityStand(location) : new EntityArmorStand(((CraftWorld) location.getWorld()).getHandle(), line);
@@ -322,23 +324,32 @@ public class NMS1_8R3 implements INMS {
     entity.pitch = location.getPitch();
     armor.setName(name);
 
-    if (this.addEntity(entity)) {
-      return armor;
+    if (line != null) {
+      this.preHologram.put(armor.getId(), line.getHologram());
     }
 
-    return null;
+    boolean add = this.addEntity(entity);
+    if (line != null) {
+      this.preHologram.remove(armor.getId());
+    }
+
+    return add ? armor : null;
   }
 
   public ISlime createSlime(Location location, HologramLine line) {
-    ISlime slime = new EntitySlime(((CraftWorld) location.getWorld()).getHandle(), line);
-    net.minecraft.server.v1_8_R3.Entity entity = (net.minecraft.server.v1_8_R3.Entity) slime;
+    EntitySlime slime = new EntitySlime(((CraftWorld) location.getWorld()).getHandle(), line);
     slime.setLocation(location.getX(), location.getY(), location.getZ());
 
-    if (addEntity(entity)) {
-      return slime;
+    if (line != null) {
+      this.preHologram.put(slime.getId(), line.getHologram());
     }
 
-    return null;
+    boolean add = this.addEntity(slime);
+    if (line != null) {
+      this.preHologram.remove(slime.getId());
+    }
+
+    return add ? slime : null;
   }
 
   @Override
@@ -347,17 +358,25 @@ public class NMS1_8R3 implements INMS {
       return null;
     }
 
-    if (!(entity instanceof CraftArmorStand)) {
+    if (!(entity instanceof CraftEntity)) {
       return null;
     }
 
     net.minecraft.server.v1_8_R3.Entity en = ((CraftEntity) entity).getHandle();
-    if (!(en instanceof EntityArmorStand)) {
-      return null;
+
+    HologramLine e = null;
+    if (en instanceof EntityArmorStand) {
+      e = ((EntityArmorStand) en).getLine();
+    } else if (en instanceof EntitySlime) {
+      e = ((EntitySlime) en).getLine();
     }
 
-    HologramLine e = ((EntityArmorStand) en).getLine();
     return e != null ? e.getHologram() : null;
+  }
+
+  @Override
+  public Hologram getPreHologram(int entityId) {
+    return this.preHologram.get(entityId);
   }
 
   @Override

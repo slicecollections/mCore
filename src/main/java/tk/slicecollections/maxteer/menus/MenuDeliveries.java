@@ -72,6 +72,8 @@ public class MenuDeliveries extends UpdatablePlayerMenu {
       this.setItem(delivery.getSlot(), item);
       this.deliveries.put(item, delivery);
     }
+
+    this.player.updateInventory();
   }
 
   public void cancel() {

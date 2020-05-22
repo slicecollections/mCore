@@ -1,12 +1,12 @@
 package tk.slicecollections.maxteer.libraries.menu;
 
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import tk.slicecollections.maxteer.utils.BukkitUtils;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * @author Maxter
@@ -84,7 +84,7 @@ public class PagedMenu {
       return;
     }
 
-    this.menus.forEach(menu -> menu.getInventory().getViewers().forEach(player -> player.closeInventory()));
+    this.menus.forEach(menu -> menu.getInventory().getViewers().forEach(HumanEntity::closeInventory));
     this.menus.clear();
     this.lastListSize = items.size();
     List<List<ItemStack>> splitted = split(items);
@@ -95,12 +95,12 @@ public class PagedMenu {
     for (int i = 0; i < splitted.size(); i++) {
       List<ItemStack> list = splitted.get(i);
       Menu menu = new Menu(name, this.rows);
-      for (Entry<Integer, ItemStack> entry : this.slots.entrySet()) {
-        menu.getSlots().remove(entry.getKey());
-        if (entry.getValue() != null) {
-          menu.setItem(entry.getKey(), entry.getValue());
+      this.slots.forEach((key, value) -> {
+        menu.getSlots().remove(key);
+        if (value != null) {
+          menu.setItem(key, value);
         }
-      }
+      });
 
       menu.setItems(list);
       if (splitted.size() > 1) {
@@ -124,11 +124,11 @@ public class PagedMenu {
 
     for (int i = 0; i < splitted.size(); i++) {
       Menu menu = menus.get(i);
-      for (Entry<Integer, ItemStack> entry : this.slots.entrySet()) {
-        if (entry.getValue() != null) {
-          menu.setItem(entry.getKey(), entry.getValue());
+      this.slots.forEach((key, value) -> {
+        if (value != null) {
+          menu.setItem(key, value);
         }
-      }
+      });
 
       menu.setItems(splitted.get(i));
     }

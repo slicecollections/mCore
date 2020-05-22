@@ -1,13 +1,15 @@
 package tk.slicecollections.maxteer.libraries.holograms.api;
 
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.bukkit.Location;
-import com.google.common.collect.ImmutableList;
 
 public class Hologram {
+
+  private String attached;
 
   private boolean spawned;
   private Location location;
@@ -21,6 +23,10 @@ public class Hologram {
       this.lines.put(++current,
           new HologramLine(this, location.clone().add(0, 0.33 * current, 0), line));
     }
+  }
+
+  public void setAttached(String player) {
+    this.attached = player;
   }
 
   public Hologram spawn() {
@@ -65,6 +71,10 @@ public class Hologram {
     HologramLine hl = this.lines.get(id);
     hl.setLine(line);
     return this;
+  }
+
+  public boolean canSee(Player player) {
+    return this.attached == null || this.attached.equals(player.getName());
   }
   
   public boolean isSpawned() {  

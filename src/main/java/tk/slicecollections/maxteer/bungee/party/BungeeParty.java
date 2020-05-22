@@ -53,21 +53,20 @@ public class BungeeParty extends Party {
   @Override
   public void leave(String member) {
     String leader = this.getLeader();
-    this.members.removeIf(pp -> pp.getName().equalsIgnoreCase(member));
-    this.sendData("remove", member);
-    if (this.members.isEmpty()) {
+    if (this.members.size() == 1) {
       this.delete();
       return;
     }
 
-    String prefixed = Role.getPrefixed(member);
+    this.members.removeIf(pp -> pp.getName().equalsIgnoreCase(member));
+    this.sendData("remove", member);
     if (leader.equals(member)) {
       this.sendData("newLeader", this.members.get(0).getName());
       this.leader = this.members.get(0);
       this.leader.setRole(LEADER);
-      this.broadcast(" \n" + prefixed + " §ase tornou o novo Líder da Party!\n ");
+      this.broadcast(" \n" + Role.getPrefixed(this.leader.getName()) + " §ase tornou o novo Líder da Party!\n ");
     }
-    this.broadcast(" \n" + prefixed + " §asaiu da Party!\n ");
+    this.broadcast(" \n" + Role.getPrefixed(member) + " §asaiu da Party!\n ");
   }
 
   @Override

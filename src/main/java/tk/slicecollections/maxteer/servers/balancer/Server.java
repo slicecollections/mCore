@@ -1,20 +1,33 @@
 package tk.slicecollections.maxteer.servers.balancer;
 
 import tk.slicecollections.maxteer.servers.ServerItem;
+import tk.slicecollections.maxteer.servers.ServerPing;
 import tk.slicecollections.maxteer.servers.balancer.elements.LoadBalancerObject;
 import tk.slicecollections.maxteer.servers.balancer.elements.NumberConnection;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 /**
  * @author Maxter
  */
 public class Server implements LoadBalancerObject, NumberConnection {
 
+  private ServerPing serverPing;
   private String name;
   private int max;
 
-  public Server(String name, int max) {
+  public Server(String ip, String name, int max) {
+    this.serverPing = new ServerPing(new InetSocketAddress(ip.split(":")[0], Integer.parseInt(ip.split(":")[1])));
     this.name = name;
     this.max = max;
+  }
+
+  public void fetch() {
+    try {
+      this.serverPing.fetch();
+    } catch (IOException ignore) {}
+    ServerItem.SERVER_COUNT.put(this.name, this.serverPing.getOnline());
   }
 
   public String getName() {
@@ -33,6 +46,6 @@ public class Server implements LoadBalancerObject, NumberConnection {
 
   @Override
   public boolean canBeSelected() {
-    return this.getActualNumber() < this.max;
+    return this.serverPing.getMotd() != null && this.getActualNumber() < this.max;
   }
 }
