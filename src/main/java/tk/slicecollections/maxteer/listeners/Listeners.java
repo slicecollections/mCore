@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import static tk.slicecollections.maxteer.Core.warnings;
+
 /**
  * @author Maxter
  */
@@ -74,6 +76,25 @@ public class Listeners implements Listener {
   public void onPlayerJoin(PlayerJoinEvent evt) {
     LOGGER.run(Level.SEVERE, "Could not pass PlayerJoinEvent for ${n} v${v}", () -> {
       Player player = evt.getPlayer();
+      if (!warnings.isEmpty()) {
+        TextComponent component = new TextComponent("");
+        for (BaseComponent components : TextComponent.fromLegacyText(
+          " \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com os \"plugins m\", caso continue a usar estes plugins, não terá direito a suporte.\n \n §7Remova os seguintes plugins:")) {
+          component.addExtra(components);
+        }
+        for (String warning : warnings) {
+          for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
+            component.addExtra(components);
+          }
+        }
+        for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
+          component.addExtra(components);
+        }
+
+        player.spigot().sendMessage(component);
+        EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
+      }
+
       if (!ServerItem.WARNINGS.isEmpty()) {
         TextComponent component = new TextComponent("");
         for (BaseComponent components : TextComponent.fromLegacyText(
@@ -146,18 +167,22 @@ public class Listeners implements Listener {
     String format = String.format(evt.getFormat(), player.getName(), evt.getMessage());
 
     TextComponent component = new TextComponent("");
-    for (BaseComponent components : TextComponent.fromLegacyText(format.replace(" " + evt.getMessage(), ""))) {
+    for (BaseComponent components : TextComponent.fromLegacyText(format)) {
       component.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + player.getName() + " "));
-      component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Role.getColored(player.getName()) + "\n§fGrupo: " + Role.getPlayerRole(player).getName() + "\n \n§eClique para enviar uma mensagem privada.")));
-      component.addExtra(components);
-    }
-
-    for (BaseComponent components : TextComponent.fromLegacyText(" " + evt.getMessage())) {
+      component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent
+        .fromLegacyText(Role.getColored(player.getName()) + "\n§fGrupo: " + Role.getPlayerRole(player).getName() + "\n \n§eClique para enviar uma mensagem privada.")));
       component.addExtra(components);
     }
 
     evt.setCancelled(true);
-    evt.getRecipients().forEach(players -> players.spigot().sendMessage(component));
+    evt.getRecipients().forEach(players -> {
+      if (players != null) {
+        Player.Spigot spigot = players.spigot();
+        if (spigot != null) {
+          spigot.sendMessage(component);
+        }
+      }
+    });
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

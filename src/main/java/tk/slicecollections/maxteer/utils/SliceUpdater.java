@@ -56,7 +56,7 @@ public class SliceUpdater {
       if (!file.getParentFile().exists()) {
         file.getParentFile().mkdirs();
       }
-      HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.slicecollections.tk/download/" + this.resourceId).openConnection();
+      HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.slicecollections.com.br/download/" + this.resourceId).openConnection();
       connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
       int max = connection.getContentLength();
       BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
@@ -87,7 +87,7 @@ public class SliceUpdater {
 
   private static String getVersion(int resourceId) {
     try {
-      HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.slicecollections.tk/api/v1/plugin/" + resourceId).openConnection();
+      HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.slicecollections.com.br/api/v1/plugin/" + resourceId).openConnection();
       connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
       JSONObject object = (JSONObject) new JSONParser().parse(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
       return ((JSONObject) object.get("version")).get("id").toString();

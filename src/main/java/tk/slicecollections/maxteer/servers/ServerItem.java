@@ -77,7 +77,7 @@ public class ServerItem {
       public void run() {
         SERVERS.forEach(server -> server.getBalancer().getList().forEach(Server::fetch));
       }
-    }.runTaskTimer(Core.getInstance(), 0, 40);
+    }.runTaskTimerAsynchronously(Core.getInstance(), 0, 40);
   }
 
   public static Collection<ServerItem> listServers() {

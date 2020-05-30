@@ -25,10 +25,8 @@ import tk.slicecollections.maxteer.utils.BukkitUtils;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -129,44 +127,42 @@ public class Profile {
     }
 
     if (!this.playingGame()) {
-      Profile.listProfiles().forEach(profile -> {
-        Player players = profile.getPlayer();
-        if (players == null) {
-          return;
-        }
+      for (Player players : Bukkit.getOnlinePlayers()) {
+        Profile profile = Profile.getProfile(players.getName());
+        if (profile != null) {
+          if (!profile.playingGame()) {
+            boolean friend = FriendsHook.isFriend(player.getName(), players.getName());
+            if ((this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(players).isAlwaysVisible() || friend) && !FriendsHook
+              .isBlacklisted(player.getName(), players.getName())) {
+              if (!player.canSee(players)) {
+                TitleManager.show(this, profile);
+              }
+              player.showPlayer(players);
+            } else {
+              if (player.canSee(players)) {
+                TitleManager.hide(this, profile);
+              }
+              player.hidePlayer(players);
+            }
 
-        if (!profile.playingGame()) {
-          boolean friend = FriendsHook.isFriend(player.getName(), players.getName());
-          if ((this.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(players).isAlwaysVisible() || friend) && !FriendsHook
-            .isBlacklisted(player.getName(), players.getName())) {
-            if (!player.canSee(players)) {
-              TitleManager.show(this, profile);
+            if ((profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(player).isAlwaysVisible() || friend) && !FriendsHook
+              .isBlacklisted(players.getName(), player.getName())) {
+              if (!players.canSee(player)) {
+                TitleManager.show(profile, this);
+              }
+              players.showPlayer(player);
+            } else {
+              if (players.canSee(player)) {
+                TitleManager.hide(profile, this);
+              }
+              players.hidePlayer(player);
             }
-            player.showPlayer(players);
           } else {
-            if (player.canSee(players)) {
-              TitleManager.hide(this, profile);
-            }
             player.hidePlayer(players);
-          }
-
-          if ((profile.getPreferencesContainer().getPlayerVisibility() == PlayerVisibility.TODOS || Role.getPlayerRole(player).isAlwaysVisible() || friend) && !FriendsHook
-            .isBlacklisted(players.getName(), player.getName())) {
-            if (!players.canSee(player)) {
-              TitleManager.show(profile, this);
-            }
-            players.showPlayer(player);
-          } else {
-            if (players.canSee(player)) {
-              TitleManager.hide(profile, this);
-            }
             players.hidePlayer(player);
           }
-        } else {
-          player.hidePlayer(players);
-          players.hidePlayer(player);
         }
-      });
+      }
     }
   }
 
@@ -201,8 +197,14 @@ public class Profile {
     return isOnline(this.name);
   }
 
+  private Player player;
+
   public Player getPlayer() {
-    return this.name == null ? null : Bukkit.getPlayerExact(this.name);
+    if (this.player == null) {
+      this.player = this.name == null ? null : Bukkit.getPlayerExact(this.name);
+    }
+
+    return this.player;
   }
 
   public Game<?> getGame() {
@@ -360,7 +362,7 @@ public class Profile {
     return this.getDataContainer(table, key).getContainer(containerClass);
   }
 
-  private static final Map<String, Profile> PROFILES = new HashMap<>();
+  private static final Map<String, Profile> PROFILES = new ConcurrentHashMap<>();
   private static final SimpleDateFormat COMPARE_SDF = new SimpleDateFormat("yyyy/MM/dd");
 
   public static Profile createOrLoadProfile(String playerName) {
@@ -398,6 +400,6 @@ public class Profile {
   }
 
   public static Collection<Profile> listProfiles() {
-    return ImmutableList.copyOf(PROFILES.values());
+    return PROFILES.values();
   }
 }

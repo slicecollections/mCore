@@ -32,6 +32,7 @@ import tk.slicecollections.maxteer.utils.SliceUpdater;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class Core extends MPlugin {
 
   private static Core instance;
   public static boolean validInit;
+  public static final List<String> warnings = new ArrayList<>();
   public static final List<String> minigames = Arrays.asList("Sky Wars", "The Bridge");
   public static String minigame = "";
 
@@ -67,6 +69,31 @@ public class Core extends MPlugin {
     // Remove o spawn-protection-size automaticamente
     if (Bukkit.getSpawnRadius() != 0) {
       Bukkit.setSpawnRadius(0);
+    }
+
+    if (Bukkit.getPluginManager().getPlugin("AntiVoid") != null) {
+      warnings.add(" - AntiVoid");
+    }
+    if (Bukkit.getPluginManager().getPlugin("LegendChat") != null) {
+      warnings.add(" - LegendChat");
+    }
+    if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
+      warnings.add(" - Essentials");
+    }
+    if (Bukkit.getPluginManager().getPlugin("EssentialsChat") != null) {
+      warnings.add(" - EssentialsChat");
+    }
+    if (Bukkit.getPluginManager().getPlugin("EssentialsSpawn") != null) {
+      warnings.add(" - EssentialsSpawn");
+    }
+    if (Bukkit.getPluginManager().getPlugin("EssentialsProtect") != null) {
+      warnings.add(" - EssentialsProtect");
+    }
+    if (Bukkit.getPluginManager().getPlugin("EssentialsAntiBuild") != null) {
+      warnings.add(" - EssentialsAntiBuild");
+    }
+    if (Bukkit.getPluginManager().getPlugin("Multiverse-Core") != null) {
+      warnings.add(" - Multiverse-Core");
     }
 
     PlaceholderAPI.registerExpansion(new MCoreExpansion());

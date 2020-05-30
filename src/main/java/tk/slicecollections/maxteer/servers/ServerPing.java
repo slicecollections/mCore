@@ -35,11 +35,7 @@ public class ServerPing {
     this(new InetSocketAddress(ip, port), timeout);
   }
 
-  public void fetch() throws IOException {
-    motd = null;
-    online = 0;
-    max = 0;
-
+  public void fetch() {
     try (Socket socket = new Socket()) {
       socket.setSoTimeout(timeout);
       socket.connect(host, timeout);
@@ -94,7 +90,9 @@ public class ServerPing {
       dataOutputStream.close();
       processData();
     } catch (Exception ex) {
-      throw new IOException("Error requesting ServerPing -> " + host, ex);
+      this.motd = null;
+      this.online = 0;
+      this.max = 0;
     }
   }
 

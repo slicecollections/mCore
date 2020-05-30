@@ -24,9 +24,7 @@ public class Server implements LoadBalancerObject, NumberConnection {
   }
 
   public void fetch() {
-    try {
-      this.serverPing.fetch();
-    } catch (IOException ignore) {}
+    this.serverPing.fetch();
     ServerItem.SERVER_COUNT.put(this.name, this.serverPing.getOnline());
   }
 
