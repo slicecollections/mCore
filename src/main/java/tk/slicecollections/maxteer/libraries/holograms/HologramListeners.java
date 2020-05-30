@@ -58,7 +58,7 @@ public class HologramListeners implements Listener {
         ISlime slime = (ISlime) evt.getRightClicked();
 
         Long lastClick = anticlickSpam.get(player);
-        if (lastClick != null && System.currentTimeMillis() - lastClick < 100) {
+        if (lastClick != null && System.currentTimeMillis() - lastClick < 1000) {
           return;
         }
 

@@ -126,10 +126,11 @@ public class NPCListeners implements Listener {
       NPC npc = NPCLibrary.getNPC(evt.getRightClicked());
       long last = antiSpam.get(evt.getPlayer()) == null ? 0 : antiSpam.get(evt.getPlayer()) - System.currentTimeMillis();
       if (last > 0) {
+        evt.getPlayer().sendMessage("§cAguarde " + (last / 1000.0) + "s para clicar novamente.");
         return;
       }
 
-      antiSpam.put(evt.getPlayer(), System.currentTimeMillis() + 100);
+      antiSpam.put(evt.getPlayer(), System.currentTimeMillis() + 3000);
       Bukkit.getPluginManager().callEvent(new NPCRightClickEvent(npc, evt.getPlayer()));
     }
   }

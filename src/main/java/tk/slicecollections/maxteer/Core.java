@@ -182,12 +182,14 @@ public class Core extends MPlugin {
     Player player = profile.getPlayer();
     if (player != null) {
       player.closeInventory();
-      profile.saveSync();
-      player.sendMessage("§aConectando...");
-      ByteArrayDataOutput out = ByteStreams.newDataOutput();
-      out.writeUTF("Connect");
-      out.writeUTF(name);
-      player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
+      Bukkit.getScheduler().runTaskAsynchronously(Core.getInstance(), () -> {
+        profile.saveSync();
+        player.sendMessage("§aConectando...");
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("Connect");
+        out.writeUTF(name);
+        player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
+      });
     }
   }
 }
