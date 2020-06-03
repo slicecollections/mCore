@@ -84,7 +84,7 @@ public class MySQLDatabase extends Database {
     for (DataTable table : DataTable.listTables()) {
       List<Object> values = tableMap.get(table.getInfo().name()).values().stream().map(DataContainer::get).collect(Collectors.toList());
       values.add(name.toLowerCase());
-      this.execute(table.getInfo().update(), values.toArray(new Object[values.size()]));
+      this.execute(table.getInfo().update(), values.toArray());
       values.clear();
     }
   }
@@ -94,7 +94,7 @@ public class MySQLDatabase extends Database {
     for (DataTable table : DataTable.listTables()) {
       List<Object> values = tableMap.get(table.getInfo().name()).values().stream().map(DataContainer::get).collect(Collectors.toList());
       values.add(name.toLowerCase());
-      this.update(table.getInfo().update(), values.toArray(new Object[values.size()]));
+      this.update(table.getInfo().update(), values.toArray());
       values.clear();
     }
   }

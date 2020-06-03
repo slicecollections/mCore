@@ -171,6 +171,10 @@ public class Profile {
   }
 
   public void saveSync() {
+    if (this.name == null || this.tableMap == null) {
+      return;
+    }
+
     Database.getInstance().saveSync(this.name, this.tableMap);
   }
 

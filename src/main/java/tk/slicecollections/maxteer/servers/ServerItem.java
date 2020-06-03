@@ -1,6 +1,5 @@
 package tk.slicecollections.maxteer.servers;
 
-import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.player.Profile;

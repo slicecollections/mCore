@@ -7,6 +7,8 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import tk.slicecollections.maxteer.achievements.Achievement;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.cmd.Commands;
@@ -178,18 +180,105 @@ public class Core extends MPlugin {
     return instance;
   }
 
+  private static BukkitTask QUEUE_TASK;
+  private static final List<QueuePlayer> QUEUE = new ArrayList<>();
+
   public static void sendServer(Profile profile, String name) {
+    if (!Core.getInstance().isEnabled()) {
+      return;
+    }
+
     Player player = profile.getPlayer();
     if (player != null) {
       player.closeInventory();
-      Bukkit.getScheduler().runTaskAsynchronously(Core.getInstance(), () -> {
-        profile.saveSync();
-        player.sendMessage("§aConectando...");
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("Connect");
-        out.writeUTF(name);
-        player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
-      });
+      QueuePlayer qp = QUEUE.stream().filter(qps -> qps.player.equals(player)).findFirst().orElse(null);
+      if (qp != null) {
+        if (qp.server.equalsIgnoreCase(name)) {
+          qp.player.sendMessage("§cVocê já está na fila de conexão!");
+        } else {
+          qp.server = name;
+        }
+        return;
+      }
+
+      qp = new QueuePlayer(player, name);
+      if (player.hasPermission("mcore.queue")) {
+        int index = QUEUE.stream().filter(qps -> !qps.player.hasPermission("mcore.queue")).map(QUEUE::indexOf).min(Integer::compare).orElse(-1);
+        if (index != -1) {
+          player.sendMessage("§aVocê passou na frente de alguns jogadores na Fila e começou na Posição #" + (index + 1) + ".");
+        }
+        QUEUE.add(index == -1 ? 0 : index, qp);
+      } else {
+        QUEUE.add(qp);
+      }
+      if (QUEUE_TASK == null) {
+        QUEUE_TASK = new BukkitRunnable() {
+          private boolean send;
+          private QueuePlayer current;
+
+          @Override
+          public void run() {
+            int id = 1;
+            for (QueuePlayer qp : new ArrayList<>(QUEUE)) {
+              if (!qp.player.isOnline()) {
+                QUEUE.remove(qp);
+                qp.destroy();
+                continue;
+              }
+
+              NMS.sendActionBar(qp.player, "§aVocê está na Fila para conectar-se a §8" + qp.server + " §7(Posição #" + id + ")");
+              id++;
+            }
+
+            if (this.current != null) {
+              if (!this.current.player.isOnline()) {
+                QUEUE.remove(this.current);
+                this.current.destroy();
+                this.current = null;
+                return;
+              }
+
+              if (this.send) {
+                this.current.player.closeInventory();
+                NMS.sendActionBar(this.current.player, "");
+                this.current.player.sendMessage("§aConectando...");
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("Connect");
+                out.writeUTF(this.current.server);
+                this.current.player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
+                QUEUE.remove(this.current);
+                this.current.destroy();
+                this.current = null;
+                return;
+              }
+
+              profile.saveSync();
+              this.send = true;
+              return;
+            }
+
+            if (!QUEUE.isEmpty()) {
+              this.current = QUEUE.get(0);
+              this.send = false;
+            }
+          }
+        }.runTaskTimerAsynchronously(Core.getInstance(), 0, 20);
+      }
+    }
+  }
+
+  protected static class QueuePlayer {
+    protected Player player;
+    protected String server;
+
+    public QueuePlayer(Player player, String server) {
+      this.player = player;
+      this.server = server;
+    }
+
+    public void destroy() {
+      this.player = null;
+      this.server = null;
     }
   }
 }
