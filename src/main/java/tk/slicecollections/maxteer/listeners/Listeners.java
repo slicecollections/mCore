@@ -24,6 +24,7 @@ import tk.slicecollections.maxteer.player.hotbar.HotbarButton;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.logger.MLogger;
 import tk.slicecollections.maxteer.reflection.Accessors;
+import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.TitleManager;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
@@ -44,14 +45,8 @@ public class Listeners implements Listener {
   public static final Map<String, Long> DELAY_PLAYERS = new HashMap<>();
   private static final Map<String, Long> PROTECTION_LOBBY = new HashMap<>();
 
-  private final boolean blockTell, blockLobby;
-
-  public Listeners() {
-    Map<?, ?> map =
-      Accessors.getField(SimpleCommandMap.class, "knownCommands", Map.class).get(Accessors.getMethod(Bukkit.getServer().getClass(), "getCommandMap").invoke(Bukkit.getServer()));
-    blockTell = map.containsKey("tell");
-    blockLobby = map.containsKey("lobby");
-  }
+  private static final FieldAccessor<Map> COMMAND_MAP = Accessors.getField(SimpleCommandMap.class, "knownCommands", Map.class);
+  private static final SimpleCommandMap SIMPLE_COMMAND_MAP = (SimpleCommandMap) Accessors.getMethod(Bukkit.getServer().getClass(), "getCommandMap").invoke(Bukkit.getServer());
 
   public static void setupListeners() {
     Bukkit.getPluginManager().registerEvents(new Listeners(), Core.getInstance());
@@ -76,61 +71,64 @@ public class Listeners implements Listener {
   public void onPlayerJoin(PlayerJoinEvent evt) {
     LOGGER.run(Level.SEVERE, "Could not pass PlayerJoinEvent for ${n} v${v}", () -> {
       Player player = evt.getPlayer();
-      if (!warnings.isEmpty()) {
-        TextComponent component = new TextComponent("");
-        for (BaseComponent components : TextComponent.fromLegacyText(
-          " \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com os \"plugins m\", caso continue a usar estes plugins, não terá direito a suporte.\n \n §7Remova os seguintes plugins:")) {
-          component.addExtra(components);
-        }
-        for (String warning : warnings) {
-          for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
+      if (player.hasPermission("mcore.admin")) {
+        if (!warnings.isEmpty()) {
+          TextComponent component = new TextComponent("");
+          for (BaseComponent components : TextComponent.fromLegacyText(
+            " \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com os \"plugins m\", caso continue a usar estes plugins, não terá direito a suporte.\n \n §7Remova os seguintes plugins:")) {
             component.addExtra(components);
           }
-        }
-        for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
-          component.addExtra(components);
-        }
-
-        player.spigot().sendMessage(component);
-        EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
-      }
-
-      if (!ServerItem.WARNINGS.isEmpty()) {
-        TextComponent component = new TextComponent("");
-        for (BaseComponent components : TextComponent.fromLegacyText(
-          " \n §6§lAVISO IMPORTANTE\n \n §7O sistema de servidores do mCore foi alterado nessa nova versão e, aparentemente você utiliza a versão antiga!\n §7O novo padrão de 'servernames' na servers.yml é 'IP:PORTA ; BungeeServerName' e você utiliza o antigo padrão 'BungeeServerName' nas seguintes entradas:")) {
-          component.addExtra(components);
-        }
-        for (String warning : ServerItem.WARNINGS) {
-          for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
+          for (String warning : warnings) {
+            for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
+              component.addExtra(components);
+            }
+          }
+          for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
             component.addExtra(components);
           }
-        }
-        for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
-          component.addExtra(components);
+
+          player.spigot().sendMessage(component);
+          EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
         }
 
-        player.spigot().sendMessage(component);
-        EnumSound.ORB_PICKUP.play(player, 1.0F, 1.0F);
-      }
+        if (!ServerItem.WARNINGS.isEmpty()) {
+          TextComponent component = new TextComponent("");
+          for (BaseComponent components : TextComponent.fromLegacyText(
+            " \n §6§lAVISO IMPORTANTE\n \n §7O sistema de servidores do mCore foi alterado nessa nova versão e, aparentemente você utiliza a versão antiga!\n §7O novo padrão de 'servernames' na servers.yml é 'IP:PORTA ; BungeeServerName' e você utiliza o antigo padrão 'BungeeServerName' nas seguintes entradas:")) {
+            component.addExtra(components);
+          }
+          for (String warning : ServerItem.WARNINGS) {
+            for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
+              component.addExtra(components);
+            }
+          }
+          for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
+            component.addExtra(components);
+          }
 
-      if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload && player.hasPermission("mcore.admin")) {
-        TextComponent component = new TextComponent("");
-        for (BaseComponent components : TextComponent.fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
-          component.addExtra(components);
-        }
-        TextComponent click = new TextComponent("AQUI");
-        click.setColor(ChatColor.GREEN);
-        click.setBold(true);
-        click.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mc atualizar"));
-        click.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§7Clique aqui para atualizar o mCore.")));
-        component.addExtra(click);
-        for (BaseComponent components : TextComponent.fromLegacyText("§7.\n ")) {
-          component.addExtra(components);
+          player.spigot().sendMessage(component);
+          EnumSound.ORB_PICKUP.play(player, 1.0F, 1.0F);
         }
 
-        player.spigot().sendMessage(component);
-        EnumSound.LEVEL_UP.play(player, 1.0F, 1.0F);
+        if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload) {
+          TextComponent component = new TextComponent("");
+          for (BaseComponent components : TextComponent
+            .fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
+            component.addExtra(components);
+          }
+          TextComponent click = new TextComponent("AQUI");
+          click.setColor(ChatColor.GREEN);
+          click.setBold(true);
+          click.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mc atualizar"));
+          click.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§7Clique aqui para atualizar o mCore.")));
+          component.addExtra(click);
+          for (BaseComponent components : TextComponent.fromLegacyText("§7.\n ")) {
+            component.addExtra(components);
+          }
+
+          player.spigot().sendMessage(component);
+          EnumSound.LEVEL_UP.play(player, 1.0F, 1.0F);
+        }
       }
     });
   }
@@ -194,7 +192,8 @@ public class Listeners implements Listener {
       String[] args = evt.getMessage().replace("/", "").split(" ");
 
       String command = args[0];
-      if (blockLobby && command.equals("lobby") && profile.getPreferencesContainer().getProtectionLobby() == ProtectionLobby.ATIVADO) {
+      if (COMMAND_MAP.get(SIMPLE_COMMAND_MAP).containsKey("lobby") && command.equals("lobby") && profile.getPreferencesContainer()
+        .getProtectionLobby() == ProtectionLobby.ATIVADO) {
         long last = PROTECTION_LOBBY.getOrDefault(player.getName().toLowerCase(), 0L);
         if (last > System.currentTimeMillis()) {
           PROTECTION_LOBBY.remove(player.getName().toLowerCase());
@@ -204,7 +203,7 @@ public class Listeners implements Listener {
         evt.setCancelled(true);
         PROTECTION_LOBBY.put(player.getName().toLowerCase(), System.currentTimeMillis() + 3000);
         player.sendMessage("§aVocê tem certeza? Utilize /lobby novamente para voltar ao lobby.");
-      } else if (blockTell && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
+      } else if (COMMAND_MAP.get(SIMPLE_COMMAND_MAP).containsKey("tell") && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
         profile = Profile.getProfile(args[1]);
         if (profile != null && profile.getPreferencesContainer().getPrivateMessages() != PrivateMessages.TODOS) {
           evt.setCancelled(true);

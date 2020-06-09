@@ -1,14 +1,12 @@
 package tk.slicecollections.maxteer;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import tk.slicecollections.maxteer.achievements.Achievement;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.cmd.Commands;
@@ -28,15 +26,20 @@ import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.MPlugin;
 import tk.slicecollections.maxteer.plugin.config.MConfig;
+import tk.slicecollections.maxteer.queue.Queue;
+import tk.slicecollections.maxteer.queue.QueuePlayer;
 import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.Title;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * @author Maxter
@@ -68,34 +71,35 @@ public class Core extends MPlugin {
     saveDefaultConfig();
     lobby = Bukkit.getWorlds().get(0).getSpawnLocation();
 
-    // Remove o spawn-protection-size automaticamente
+    // Remover o spawn-protection-size
     if (Bukkit.getSpawnRadius() != 0) {
       Bukkit.setSpawnRadius(0);
     }
 
-    if (Bukkit.getPluginManager().getPlugin("AntiVoid") != null) {
-      warnings.add(" - AntiVoid");
+    // Plugins que causaram incompatibilidades com os "mPlugins"
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(getResource("blacklist.txt"), StandardCharsets.UTF_8))) {
+      String plugin;
+      while ((plugin = reader.readLine()) != null) {
+        if (Bukkit.getPluginManager().getPlugin(plugin.split(" ")[0]) != null) {
+          warnings.add(" - " + plugin);
+        }
+      }
+    } catch (IOException ex) {
+      getLogger().log(Level.SEVERE, "Cannot load blacklist.txt: ", ex);
     }
-    if (Bukkit.getPluginManager().getPlugin("LegendChat") != null) {
-      warnings.add(" - LegendChat");
-    }
-    if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
-      warnings.add(" - Essentials");
-    }
-    if (Bukkit.getPluginManager().getPlugin("EssentialsChat") != null) {
-      warnings.add(" - EssentialsChat");
-    }
-    if (Bukkit.getPluginManager().getPlugin("EssentialsSpawn") != null) {
-      warnings.add(" - EssentialsSpawn");
-    }
-    if (Bukkit.getPluginManager().getPlugin("EssentialsProtect") != null) {
-      warnings.add(" - EssentialsProtect");
-    }
-    if (Bukkit.getPluginManager().getPlugin("EssentialsAntiBuild") != null) {
-      warnings.add(" - EssentialsAntiBuild");
-    }
-    if (Bukkit.getPluginManager().getPlugin("Multiverse-Core") != null) {
-      warnings.add(" - Multiverse-Core");
+
+    //
+    try {
+      SimpleCommandMap simpleCommandMap = (SimpleCommandMap) Bukkit.getServer().getClass().getDeclaredMethod("getCommandMap").invoke(Bukkit.getServer());
+      Field field = simpleCommandMap.getClass().getDeclaredField("knownCommands");
+      field.setAccessible(true);
+      Map<String, Command> knownCommands = (Map<String, Command>) field.get(simpleCommandMap);
+      knownCommands.remove("rl");
+      knownCommands.remove("reload");
+      knownCommands.remove("bukkit:rl");
+      knownCommands.remove("bukkit:reload");
+    } catch (ReflectiveOperationException ex) {
+      getLogger().log(Level.SEVERE, "Cannot remove reload command: ", ex);
     }
 
     PlaceholderAPI.registerExpansion(new MCoreExpansion());
@@ -180,9 +184,6 @@ public class Core extends MPlugin {
     return instance;
   }
 
-  private static BukkitTask QUEUE_TASK;
-  private static final List<QueuePlayer> QUEUE = new ArrayList<>();
-
   public static void sendServer(Profile profile, String name) {
     if (!Core.getInstance().isEnabled()) {
       return;
@@ -191,7 +192,8 @@ public class Core extends MPlugin {
     Player player = profile.getPlayer();
     if (player != null) {
       player.closeInventory();
-      QueuePlayer qp = QUEUE.stream().filter(qps -> qps.player.equals(player)).findFirst().orElse(null);
+      Queue queue = player.hasPermission("mcore.queue") ? Queue.VIP : Queue.MEMBER;
+      QueuePlayer qp = queue.getQueuePlayer(player);
       if (qp != null) {
         if (qp.server.equalsIgnoreCase(name)) {
           qp.player.sendMessage("§cVocê já está na fila de conexão!");
@@ -201,84 +203,7 @@ public class Core extends MPlugin {
         return;
       }
 
-      qp = new QueuePlayer(player, name);
-      if (player.hasPermission("mcore.queue")) {
-        int index = QUEUE.stream().filter(qps -> !qps.player.hasPermission("mcore.queue")).map(QUEUE::indexOf).min(Integer::compare).orElse(-1);
-        if (index != -1) {
-          player.sendMessage("§aVocê passou na frente de alguns jogadores na Fila e começou na Posição #" + (index + 1) + ".");
-        }
-        QUEUE.add(index == -1 ? 0 : index, qp);
-      } else {
-        QUEUE.add(qp);
-      }
-      if (QUEUE_TASK == null) {
-        QUEUE_TASK = new BukkitRunnable() {
-          private boolean send;
-          private QueuePlayer current;
-
-          @Override
-          public void run() {
-            int id = 1;
-            for (QueuePlayer qp : new ArrayList<>(QUEUE)) {
-              if (!qp.player.isOnline()) {
-                QUEUE.remove(qp);
-                qp.destroy();
-                continue;
-              }
-
-              NMS.sendActionBar(qp.player, "§aVocê está na Fila para conectar-se a §8" + qp.server + " §7(Posição #" + id + ")");
-              id++;
-            }
-
-            if (this.current != null) {
-              if (!this.current.player.isOnline()) {
-                QUEUE.remove(this.current);
-                this.current.destroy();
-                this.current = null;
-                return;
-              }
-
-              if (this.send) {
-                this.current.player.closeInventory();
-                NMS.sendActionBar(this.current.player, "");
-                this.current.player.sendMessage("§aConectando...");
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF("Connect");
-                out.writeUTF(this.current.server);
-                this.current.player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
-                QUEUE.remove(this.current);
-                this.current.destroy();
-                this.current = null;
-                return;
-              }
-
-              profile.saveSync();
-              this.send = true;
-              return;
-            }
-
-            if (!QUEUE.isEmpty()) {
-              this.current = QUEUE.get(0);
-              this.send = false;
-            }
-          }
-        }.runTaskTimerAsynchronously(Core.getInstance(), 0, 20);
-      }
-    }
-  }
-
-  protected static class QueuePlayer {
-    protected Player player;
-    protected String server;
-
-    public QueuePlayer(Player player, String server) {
-      this.player = player;
-      this.server = server;
-    }
-
-    public void destroy() {
-      this.player = null;
-      this.server = null;
+      queue.queue(player, profile, name);
     }
   }
 }

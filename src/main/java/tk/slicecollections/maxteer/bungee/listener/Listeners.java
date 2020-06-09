@@ -24,6 +24,7 @@ import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.libraries.profile.InvalidMojangException;
 import tk.slicecollections.maxteer.libraries.profile.Mojang;
 import tk.slicecollections.maxteer.reflection.Accessors;
+import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 
 import javax.sql.rowset.CachedRowSet;
 import java.util.HashMap;
@@ -36,14 +37,7 @@ public class Listeners implements Listener {
 
   private static final Map<String, Long> PROTECTION_LOBBY = new HashMap<>();
   private static final Map<String, Boolean> TELL_CACHE = new HashMap<>(), PROTECTION_CACHE = new HashMap<>();
-
-  private final boolean blockTell, blockLobby;
-
-  public Listeners() {
-    Map<?, ?> map = Accessors.getField(PluginManager.class, "commandMap", Map.class).get(ProxyServer.getInstance().getPluginManager());
-    blockTell = map.containsKey("tell");
-    blockLobby = map.containsKey("lobby");
-  }
+  private static final FieldAccessor<Map> COMMAND_MAP = Accessors.getField(PluginManager.class, "commandMap", Map.class);
 
   @EventHandler
   public void onServerDisconnect(ServerDisconnectEvent evt) {
@@ -103,7 +97,7 @@ public class Listeners implements Listener {
         String[] args = evt.getMessage().replace("/", "").split(" ");
 
         String command = args[0];
-        if (blockLobby && command.equals("lobby") && this.hasProtectionLobby(player.getName().toLowerCase())) {
+        if (COMMAND_MAP.get(ProxyServer.getInstance().getPluginManager()).containsKey("lobby") && command.equals("lobby") && this.hasProtectionLobby(player.getName().toLowerCase())) {
           long last = PROTECTION_LOBBY.getOrDefault(player.getName().toLowerCase(), 0L);
           if (last > System.currentTimeMillis()) {
             PROTECTION_LOBBY.remove(player.getName().toLowerCase());
@@ -113,7 +107,7 @@ public class Listeners implements Listener {
           evt.setCancelled(true);
           PROTECTION_LOBBY.put(player.getName().toLowerCase(), System.currentTimeMillis() + 3000);
           player.sendMessage(TextComponent.fromLegacyText("§aVocê tem certeza? Utilize /lobby novamente para voltar ao lobby."));
-        } else if (blockTell && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
+        } else if (COMMAND_MAP.get(ProxyServer.getInstance().getPluginManager()).containsKey("tell") && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
           if (!this.canReceiveTell(args[1].toLowerCase())) {
             evt.setCancelled(true);
             player.sendMessage(TextComponent.fromLegacyText("§cEste usuário desativou as mensagens privadas."));
