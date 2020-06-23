@@ -7,6 +7,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.player.fake.FakeManager;
 
@@ -60,6 +61,14 @@ public class FakeAdapter extends PacketAdapter {
       WrappedChatComponent component = packet.getChatComponents().read(0);
       if (component != null) {
         packet.getChatComponents().write(0, WrappedChatComponent.fromJson(FakeManager.replaceNickedPlayers(component.getJson(), true)));
+      }
+      WrappedChatComponent[] components = packet.getChatComponentArrays().read(0);
+      if (components != null) {
+        List<WrappedChatComponent> newComps = new ArrayList<>();
+        for (WrappedChatComponent comp : components) {
+          newComps.add(WrappedChatComponent.fromJson(FakeManager.replaceNickedPlayers(comp.getJson(), true)));
+        }
+        packet.getChatComponentArrays().write(0, newComps.toArray(new WrappedChatComponent[0]));
       }
     } else if (packet.getType() == SCOREBOARD_OBJECTIVE) {
       packet.getStrings().write(1, FakeManager.replaceNickedPlayers(packet.getStrings().read(1), true));
