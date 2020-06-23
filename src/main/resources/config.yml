@@ -2,6 +2,8 @@ database:
  # Tipos de bancos de dados disponíveis atualmente: MySQL
  tipo: 'MySQL'
  mysql:
+  # Utilizar Hikari
+  hikari: false
   # Host para acessar o MySQL
   host: 'localhost'
   # Porta para acessar o MySQL

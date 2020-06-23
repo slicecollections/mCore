@@ -44,6 +44,7 @@ import java.util.logging.Level;
 /**
  * @author Maxter
  */
+@SuppressWarnings("unchecked")
 public class Core extends MPlugin {
 
   private static Core instance;
@@ -88,7 +89,7 @@ public class Core extends MPlugin {
       getLogger().log(Level.SEVERE, "Cannot load blacklist.txt: ", ex);
     }
 
-    //
+    // Remover /reload
     try {
       SimpleCommandMap simpleCommandMap = (SimpleCommandMap) Bukkit.getServer().getClass().getDeclaredMethod("getCommandMap").invoke(Bukkit.getServer());
       Field field = simpleCommandMap.getClass().getDeclaredField("knownCommands");
@@ -104,8 +105,15 @@ public class Core extends MPlugin {
 
     PlaceholderAPI.registerExpansion(new MCoreExpansion());
 
-    Database.setupDatabase(getConfig().getString("database.tipo"), getConfig().getString("database.mysql.host"), getConfig().getString("database.mysql.porta"),
-      getConfig().getString("database.mysql.nome"), getConfig().getString("database.mysql.usuario"), getConfig().getString("database.mysql.senha"));
+    Database.setupDatabase(
+      getConfig().getString("database.tipo"),
+      getConfig().getString("database.mysql.host"),
+      getConfig().getString("database.mysql.porta"),
+      getConfig().getString("database.mysql.nome"),
+      getConfig().getString("database.mysql.usuario"),
+      getConfig().getString("database.mysql.senha"),
+      getConfig().getBoolean("database.mysql.hikari",false)
+    );
 
     NPCLibrary.setupNPCs(this);
     HologramLibrary.setupHolograms(this);

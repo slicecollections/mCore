@@ -17,6 +17,7 @@ public class QueuePlayer {
 
   public void destroy() {
     this.player = null;
+    this.profile = null;
     this.server = null;
   }
 }

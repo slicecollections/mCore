@@ -25,8 +25,10 @@ public abstract class Database {
   public static final Logger LOGGER =
     Manager.BUNGEE ? tk.slicecollections.maxteer.bungee.Bungee.getInstance().getLogger() : tk.slicecollections.maxteer.Core.getInstance().getLogger();
 
-  public static void setupDatabase(String type, String mysqlHost, String mysqlPort, String mysqlDbname, String mysqlUsername, String mysqlPassword) {
-    if (type.equalsIgnoreCase("mysql")) {
+  public static void setupDatabase(String type, String mysqlHost, String mysqlPort, String mysqlDbname, String mysqlUsername, String mysqlPassword, boolean hikari) {
+    if (hikari) {
+      instance = new HikariDatabase(mysqlHost, mysqlPort, mysqlDbname, mysqlUsername, mysqlPassword);
+    } else {
       instance = new MySQLDatabase(mysqlHost, mysqlPort, mysqlDbname, mysqlUsername, mysqlPassword);
     }
   }

@@ -30,17 +30,10 @@ public class Queue {
 
         @Override
         public void run() {
-          if (this.current == null && !players.isEmpty()) {
-            this.current = players.get(0);
-            this.send = false;
-            this.saving = false;
-          }
-
           int id = 1;
-          List<QueuePlayer> toRemove = new ArrayList<>();
-          for (QueuePlayer qp : players) {
+          for (QueuePlayer qp : new ArrayList<>(players)) {
             if (!qp.player.isOnline()) {
-              toRemove.remove(qp);
+              players.remove(qp);
               qp.destroy();
               continue;
             }
@@ -49,11 +42,8 @@ public class Queue {
             id++;
           }
 
-          players.removeAll(toRemove);
-          toRemove.clear();
-
           if (this.current != null) {
-            if (!this.current.player.isOnline()) {
+            if (this.current.player == null || !this.current.player.isOnline()) {
               players.remove(this.current);
               this.current.destroy();
               this.current = null;
@@ -79,6 +69,12 @@ public class Queue {
               this.current.profile.saveSync();
               this.send = true;
             }
+          }
+
+          if (this.current == null && !players.isEmpty()) {
+            this.current = players.get(0);
+            this.send = false;
+            this.saving = false;
           }
         }
       }.runTaskTimerAsynchronously(Core.getInstance(), 0, 20);

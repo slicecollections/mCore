@@ -40,7 +40,8 @@ public class Bungee extends Plugin {
       config.getString("database.mysql.porta"),
       config.getString("database.mysql.nome"),
       config.getString("database.mysql.usuario"),
-      config.getString("database.mysql.senha")
+      config.getString("database.mysql.senha"),
+      config.getBoolean("database.mysql.hikari", false)
     );
 
     setupRoles();

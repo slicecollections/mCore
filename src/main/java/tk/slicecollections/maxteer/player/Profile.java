@@ -167,6 +167,10 @@ public class Profile {
   }
 
   public void save() {
+    if (this.name == null || this.tableMap == null) {
+      return;
+    }
+
     Database.getInstance().save(this.name, this.tableMap);
   }
 
