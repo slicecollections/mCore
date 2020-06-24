@@ -90,8 +90,8 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputFile>D:\Database\SliceCollections\${project.artifactId}.jar</outputFile>
-                            <!-- <outputFile>D:\Database\Servidores\mlobby\plugins\${project.artifactId}.jar</outputFile> -->
+                            <!-- <outputFile>D:\Database\SliceCollections\${project.artifactId}.jar</outputFile>-->
+                            <outputFile>D:\Database\Servidores\mlobby\plugins\${project.artifactId}.jar</outputFile>
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.spigotmc:*</exclude>
