@@ -2,12 +2,18 @@ package tk.slicecollections.maxteer.cmd;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.player.fake.FakeManager;
+import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.utils.Validator;
+import tk.slicecollections.maxteer.utils.enums.EnumSound;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static tk.slicecollections.maxteer.player.fake.FakeManager.ALEX;
+import static tk.slicecollections.maxteer.player.fake.FakeManager.STEVE;
 
 /**
  * @author Maxter
@@ -31,35 +37,56 @@ public class FakeCommand extends Commands {
       return;
     }
 
+    Profile profile = Profile.getProfile(player.getName());
     if (label.equalsIgnoreCase("fake")) {
-      String fakeName = args.length > 0 ? args[0] : null;
+      if (profile != null && profile.playingGame()) {
+        player.sendMessage("§cVocê não pode utilizar este comando no momento.");
+        return;
+      }
+
+      if (FakeManager.getRandomNicks().stream().noneMatch(FakeManager::isUsable)) {
+        player.sendMessage(" \n §c§lALTERAR NICKNAME\n \n §cNenhum nickname está disponível para uso no momento.\n ");
+        return;
+      }
+
       if (args.length == 0) {
-        List<String> list = FakeManager.getRandomNicks().stream().filter(FakeManager::isUsable).collect(Collectors.toList());
-        Collections.shuffle(list);
-        fakeName = list.stream().findFirst().orElse(null);
-        if (fakeName == null) {
-          player.sendMessage(" \n §cNenhum nickname aleatório está disponível no momento.\n §cVocê pode utilizar um nome diferente através do comando /fake [nome]\n ");
-          return;
-        }
-      }
-
-      if (!FakeManager.isUsable(fakeName)) {
-        player.sendMessage("§cEste nickname falso não está disponível para uso.");
+        FakeManager.sendRole(player);
         return;
       }
 
-      if (fakeName.length() > 16 || fakeName.length() < 4) {
-        player.sendMessage("§cO nickname falso precisa conter de 4 a 16 caracteres.");
+      String roleName = args[0];
+      if (Role.getRoleByName(roleName) == null) {
+        EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
+        FakeManager.sendRole(player);
         return;
       }
 
-      if (!Validator.isValidUsername(fakeName)) {
-        player.sendMessage("§cO nickname falso não pode conter caracteres especiais.");
+      if (args.length == 1) {
+        EnumSound.ORB_PICKUP.play(player, 1.0F, 2.0F);
+        FakeManager.sendSkin(player, roleName);
         return;
       }
 
-      FakeManager.applyFake(player, fakeName);
+      String skin = args[1];
+      if (!skin.equalsIgnoreCase("alex") && !skin.equalsIgnoreCase("steve")) {
+        EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
+        FakeManager.sendSkin(player, roleName);
+        return;
+      }
+
+      String fakeName = FakeManager.getRandomNicks().stream().filter(FakeManager::isUsable).sorted().findAny().orElse(null);
+      if (fakeName == null) {
+        player.sendMessage(" \n §c§lALTERAR NICKNAME\n \n §cNenhum nickname está disponível para uso no momento.\n ");
+        return;
+      }
+
+      FakeManager.applyFake(player, fakeName, roleName, skin.equalsIgnoreCase("steve") ? STEVE : ALEX);
     } else if (label.equalsIgnoreCase("faker")) {
+      if (profile != null && profile.playingGame()) {
+        player.sendMessage("§cVocê não pode utilizar este comando no momento.");
+        return;
+      }
+
       if (!FakeManager.isFake(player.getName())) {
         player.sendMessage("§cVocê não está utilizando um nickname falso.");
         return;

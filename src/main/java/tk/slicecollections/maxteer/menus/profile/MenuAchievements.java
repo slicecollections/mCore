@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.achievements.Achievement;
+import tk.slicecollections.maxteer.achievements.types.MurderAchievement;
 import tk.slicecollections.maxteer.achievements.types.SkyWarsAchievement;
 import tk.slicecollections.maxteer.achievements.types.TheBridgeAchievement;
 import tk.slicecollections.maxteer.libraries.menu.PlayerMenu;
@@ -48,7 +49,8 @@ public class MenuAchievements extends PlayerMenu {
               EnumSound.CLICK.play(this.player, 0.5F, 2.0F);
               new MenuAchievementsList<>(profile, "The Bridge", TheBridgeAchievement.class);
             } else if (evt.getSlot() == 15) {
-              EnumSound.ENDERMAN_TELEPORT.play(this.player, 0.5F, 1.0F);
+              EnumSound.CLICK.play(this.player, 0.5F, 1.0F);
+              new MenuAchievementsList<>(profile, "Murder", MurderAchievement.class);
             } else if (evt.getSlot() == 31) {
               EnumSound.CLICK.play(this.player, 0.5F, 2.0F);
               new MenuProfile(profile);
@@ -77,7 +79,12 @@ public class MenuAchievements extends PlayerMenu {
     this.setItem(13,
       BukkitUtils.deserializeItemStack("STAINED_CLAY:11 : 1 : nome>&aThe Bridge : desc>&fDesafios: " + color + completed + "/" + max + "\n \n&eClique para visualizar!"));
 
-    this.setItem(15, BukkitUtils.deserializeItemStack("STAINED_GLASS_PANE:14 : 1 : nome>&cEm breve"));
+    List<MurderAchievement> murder = Achievement.listAchievements(MurderAchievement.class);
+    max = murder.size();
+    completed = murder.stream().filter(achievement -> achievement.isCompleted(profile)).count();
+    color = (completed == max) ? "&a" : (completed > max / 2) ? "&7" : "&c";
+    murder.clear();
+    this.setItem(15, BukkitUtils.deserializeItemStack("BOW : 1 : nome>&aMurder : desc>&fDesafios: " + color + completed + "/" + max + "\n \n&eClique para visualizar!"));
 
     this.setItem(31, BukkitUtils.deserializeItemStack("INK_SACK:1 : 1 : nome>&cVoltar"));
 

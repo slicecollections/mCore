@@ -10,11 +10,15 @@ import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
+import java.text.SimpleDateFormat;
+
 /**
  * @author Maxter
  */
 @SuppressWarnings("all")
 public class MCoreExpansion extends PlaceholderExpansion {
+
+  private static final SimpleDateFormat MURDER_FORMAT = new SimpleDateFormat("mm:ss");
 
   @Override
   public boolean canRegister() {
@@ -50,10 +54,10 @@ public class MCoreExpansion extends PlaceholderExpansion {
         if (si != null) {
           return StringUtils.formatNumber(si.getBalancer().getTotalNumber());
         }
-        
+
         return "entry invalida";
       }
-      
+
       long online = 0;
       for (ServerItem si : ServerItem.listServers()) {
         online += si.getBalancer().getTotalNumber();
@@ -96,6 +100,20 @@ public class MCoreExpansion extends PlaceholderExpansion {
         return StringUtils.formatNumber(profile.getStats(table, value));
       } else if (value.equals("winstreak")) {
         return StringUtils.formatNumber(profile.getDailyStats(table, "laststreak", value));
+      } else if (value.equals("coins")) {
+        return StringUtils.formatNumber(profile.getCoins(table));
+      }
+    } else if (params.startsWith("Murder_")) {
+      String table = "mCoreMurder";
+      String value = params.replace("Murder_", "");
+      if (value.startsWith("classic_")) {
+        String data = value.replace("classic_", "");
+        if (data.equals("kills") || data.equals("bowkills") || data.equals("knifekills") || data.equals("thrownknifekills") || data.equals("wins") || data
+          .equals("detectivewins") || data.equals("killerwins")) {
+          return StringUtils.formatNumber(profile.getStats(table, "cl" + data));
+        } else if (data.equals("quickestdetective") || data.equals("quickestkiller")) {
+          return MURDER_FORMAT.format(profile.getStats(table, "cl" + data) * 1000);
+        }
       } else if (value.equals("coins")) {
         return StringUtils.formatNumber(profile.getCoins(table));
       }

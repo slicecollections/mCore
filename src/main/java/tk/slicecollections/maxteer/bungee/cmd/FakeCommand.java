@@ -4,11 +4,10 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import tk.slicecollections.maxteer.bungee.Bungee;
-import tk.slicecollections.maxteer.utils.Validator;
+import tk.slicecollections.maxteer.player.role.Role;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import static tk.slicecollections.maxteer.bungee.Bungee.ALEX;
+import static tk.slicecollections.maxteer.bungee.Bungee.STEVE;
 
 /**
  * @author Maxter
@@ -32,32 +31,39 @@ public class FakeCommand extends Commands {
       return;
     }
 
-    String fakeName = args.length > 0 ? args[0] : null;
+    if (Bungee.getRandomNicks().stream().noneMatch(Bungee::isUsable)) {
+      player.sendMessage(TextComponent.fromLegacyText(" \n §c§lALTERAR NICKNAME\n \n §cNenhum nickname está disponível para uso no momento.\n "));
+      return;
+    }
+
     if (args.length == 0) {
-      List<String> list = Bungee.getRandomNicks().stream().filter(Bungee::isUsable).collect(Collectors.toList());
-      Collections.shuffle(list);
-      fakeName = list.stream().findFirst().orElse(null);
-      if (fakeName == null) {
-        player.sendMessage(TextComponent.fromLegacyText(" \n §cNenhum nickname aleatório está disponível no momento.\n §cVocê pode utilizar um nome diferente através do comando /fake [nome]\n "));
-        return;
-      }
-    }
-
-    if (!Bungee.isUsable(fakeName)) {
-      player.sendMessage(TextComponent.fromLegacyText("§cEste nickname falso não está disponível para uso."));
+      Bungee.sendRole(player, null);
       return;
     }
 
-    if (fakeName.length() > 16 || fakeName.length() < 4) {
-      player.sendMessage(TextComponent.fromLegacyText("§cO nickname falso precisa conter de 4 a 16 caracteres."));
+    String roleName = args[0];
+    if (Role.getRoleByName(roleName) == null) {
+      Bungee.sendRole(player, "VILLAGER_NO");
       return;
     }
 
-    if (!Validator.isValidUsername(fakeName)) {
-      player.sendMessage(TextComponent.fromLegacyText("§cO nickname falso não pode conter caracteres especiais."));
+    if (args.length == 1) {
+      Bungee.sendSkin(player, roleName, "ORB_PICKUP");
       return;
     }
 
-    Bungee.applyFake(player, fakeName);
+    String skin = args[1];
+    if (!skin.equalsIgnoreCase("alex") && !skin.equalsIgnoreCase("steve")) {
+      Bungee.sendSkin(player, roleName, "VILLAGER_NO");
+      return;
+    }
+
+    String fakeName = Bungee.getRandomNicks().stream().filter(Bungee::isUsable).sorted().findAny().orElse(null);
+    if (fakeName == null) {
+      player.sendMessage(TextComponent.fromLegacyText(" \n §c§lALTERAR NICKNAME\n \n §cNenhum nickname está disponível para uso no momento.\n "));
+      return;
+    }
+
+    Bungee.applyFake(player, fakeName, roleName, skin.equalsIgnoreCase("steve") ? STEVE : ALEX);
   }
 }

@@ -64,7 +64,7 @@ public class EntityNPCPlayer extends EntityPlayer implements NPCHolder, Skinnabl
 
   @Override
   public boolean damageEntity(DamageSource damagesource, float f) {
-   return super.damageEntity(damagesource, f);
+    return super.damageEntity(damagesource, f);
   }
 
   public void die(DamageSource damagesource) {

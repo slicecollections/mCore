@@ -84,7 +84,7 @@ public class Role {
   private static String getTaggedName(String name, boolean onlyColor, boolean removeFake) {
     String prefix = "&7";
     if (!removeFake && Manager.isFake(name)) {
-      prefix = Manager.getFakeRole().getPrefix();
+      prefix = Manager.getFakeRole(name).getPrefix();
       if (onlyColor) {
         prefix = StringUtils.getLastColor(prefix);
       }
@@ -145,7 +145,7 @@ public class Role {
 
   public static Role getPlayerRole(Object player, boolean removeFake) {
     if (!removeFake && Manager.isFake(Manager.getName(player))) {
-      return Manager.getFakeRole();
+      return Manager.getFakeRole(Manager.getName(player));
     }
 
     for (Role role : ROLES) {

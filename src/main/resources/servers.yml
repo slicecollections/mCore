@@ -28,3 +28,9 @@ items:
   max-players: 50
   servernames:
   - '127.0.0.1:25567 ; thebridge'
+ murder:
+   slot: 14
+   icon: 'BOW : 1 : nome>&aMurder : desc>\n  &71 Detetive, 1 Assassino e vários inocentes.\n  &7Será você capaz de vencer nesse jogo\n  &7de traição e assassinato?\n \n  &7▪ &fClássico\n \n&eClique para jogar!\n&7{players} jogando.'
+   max-players: 50
+   servernames:
+     - '127.0.0.1:25568 ; murder'

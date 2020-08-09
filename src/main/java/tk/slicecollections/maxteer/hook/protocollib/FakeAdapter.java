@@ -33,7 +33,10 @@ public class FakeAdapter extends PacketAdapter {
   public void onPacketReceiving(PacketEvent evt) {
     PacketContainer packet = evt.getPacket();
     if (packet.getType() == PacketType.Play.Client.CHAT) {
-      packet.getStrings().write(0, FakeManager.replaceNickedPlayers(packet.getStrings().read(0), false));
+      String command = packet.getStrings().read(0);
+      if (command.startsWith("/")) {
+        packet.getStrings().write(0, FakeManager.replaceNickedPlayers(packet.getStrings().read(0), false));
+      }
     }
   }
 
@@ -46,7 +49,7 @@ public class FakeAdapter extends PacketAdapter {
         list.add(FakeManager.replaceNickedPlayers(complete, true));
       }
 
-      packet.getStringArrays().write(0, list.toArray(new String[list.size()]));
+      packet.getStringArrays().write(0, list.toArray(new String[0]));
     } else if (packet.getType() == PLAYER_INFO) {
       List<PlayerInfoData> infoDataList = new ArrayList<>();
       for (PlayerInfoData infoData : packet.getPlayerInfoDataLists().read(0)) {

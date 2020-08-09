@@ -47,11 +47,11 @@ public class CashManager {
   }
 
   public static void removeCash(Player player, long amount) throws CashException {
-    addCash(player.getName(), amount);
+    removeCash(player.getName(), amount);
   }
 
   public static void removeCash(String name, long amount) throws CashException {
-    addCash(Profile.getProfile(name), amount);
+    removeCash(Profile.getProfile(name), amount);
   }
 
   public static void setCash(Profile profile, long amount) throws CashException {

@@ -4,12 +4,15 @@ cash: true
 bungeecord: false
 # /fake do mCore
 fake:
-  # Role que será aplicada no fake
-  role: 'MVP+'
-  # Nomes que não podem ser utilizados
-  blocked:
-    - 'whereismywaifu'
-  # Nomes aleatórios do /fake random
+  # Roles que podem ser utilizadas com o /fake
+  # Não tem efeito no Bungeecord, a srole vão de acordo com as do servidor spigot em que o jogador está conectado.
+  role:
+  - 'Membro'
+  - 'VIP'
+  - 'VIP+'
+  - 'MVP'
+  - 'MVP+'
+  # Nomes aleatórios do /fake
   randoms:
     - 'whereismysword'
     - 'clankboy17'

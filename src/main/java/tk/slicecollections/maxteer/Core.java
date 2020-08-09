@@ -5,6 +5,7 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.achievements.Achievement;
@@ -23,6 +24,7 @@ import tk.slicecollections.maxteer.listeners.Listeners;
 import tk.slicecollections.maxteer.listeners.PluginMessageListener;
 import tk.slicecollections.maxteer.nms.NMS;
 import tk.slicecollections.maxteer.player.Profile;
+import tk.slicecollections.maxteer.player.fake.FakeManager;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.MPlugin;
 import tk.slicecollections.maxteer.plugin.config.MConfig;
@@ -50,7 +52,7 @@ public class Core extends MPlugin {
   private static Core instance;
   public static boolean validInit;
   public static final List<String> warnings = new ArrayList<>();
-  public static final List<String> minigames = Arrays.asList("Sky Wars", "The Bridge");
+  public static final List<String> minigames = Arrays.asList("Sky Wars", "The Bridge", "Murder");
   public static String minigame = "";
 
   @Override
@@ -77,8 +79,8 @@ public class Core extends MPlugin {
       Bukkit.setSpawnRadius(0);
     }
 
-    // Plugins que causaram incompatibilidades com os "mPlugins"
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(getResource("blacklist.txt"), StandardCharsets.UTF_8))) {
+    // Plugins que causaram incompatibilidades
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getResource("blacklist.txt"), StandardCharsets.UTF_8))) {
       String plugin;
       while ((plugin = reader.readLine()) != null) {
         if (Bukkit.getPluginManager().getPlugin(plugin.split(" ")[0]) != null) {
@@ -87,6 +89,18 @@ public class Core extends MPlugin {
       }
     } catch (IOException ex) {
       getLogger().log(Level.SEVERE, "Cannot load blacklist.txt: ", ex);
+    }
+
+    if (!warnings.isEmpty()) {
+      CommandSender sender = Bukkit.getConsoleSender();
+      StringBuilder sb = new StringBuilder(" \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com o mCore e CIA. Você não poderá iniciar o servidor com os seguintes plugins:");
+      for (String warning : warnings) {
+        sb.append("\n§f").append(warning);
+      }
+      sb.append("\n ");
+      sender.sendMessage(sb.toString());
+      System.exit(0);
+      return;
     }
 
     // Remover /reload
@@ -119,6 +133,7 @@ public class Core extends MPlugin {
     HologramLibrary.setupHolograms(this);
 
     setupRoles();
+    FakeManager.setupFake();
     Title.setupTitles();
     Booster.setupBoosters();
     Delivery.setupDeliveries();
@@ -133,6 +148,7 @@ public class Core extends MPlugin {
     ProtocolLibrary.getProtocolManager().addPacketListener(new HologramAdapter());
 
     getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+    getServer().getMessenger().registerOutgoingPluginChannel(this, "mCore");
     getServer().getMessenger().registerIncomingPluginChannel(this, "mCore", new PluginMessageListener());
 
     Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> new SliceUpdater(this, 4).run());

@@ -3,6 +3,7 @@ package tk.slicecollections.maxteer.database.data;
 import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.database.data.interfaces.DataTableInfo;
 import tk.slicecollections.maxteer.database.tables.CoreTable;
+import tk.slicecollections.maxteer.database.tables.MurderTable;
 import tk.slicecollections.maxteer.database.tables.SkyWarsTable;
 import tk.slicecollections.maxteer.database.tables.TheBridgeTable;
 
@@ -30,6 +31,7 @@ public abstract class DataTable {
     TABLES.add(new CoreTable());
     TABLES.add(new SkyWarsTable());
     TABLES.add(new TheBridgeTable());
+    TABLES.add(new MurderTable());
   }
 
   public static void registerTable(DataTable table) {

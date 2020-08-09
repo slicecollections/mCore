@@ -1,6 +1,10 @@
 package tk.slicecollections.maxteer.nms.v1_8_R3.utils;
 
 import net.minecraft.server.v1_8_R3.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
@@ -48,6 +52,8 @@ public class PlayerlistTrackerEntry extends EntityTrackerEntry {
       return;
     }
 
+
+    boolean layingSend = false;
     if (entityplayer != tracker && c(entityplayer)) {
       if (!trackedPlayers.contains(entityplayer) && (entityplayer.u().getPlayerChunkMap().a(entityplayer, tracker.ae, tracker.ag) || tracker.attachedToPlayer)) {
         if (tracker instanceof SkinnableEntity) {
@@ -61,11 +67,23 @@ public class PlayerlistTrackerEntry extends EntityTrackerEntry {
           Player player = entity.getEntity();
           if (entityplayer.getBukkitEntity().canSee(player)) {
             entity.getSkinTracker().updateViewer(entityplayer.getBukkitEntity());
+            layingSend = true;
           }
         }
       }
     }
 
     super.updatePlayer(entityplayer);
+    if (layingSend) {
+      Player player = entityplayer.getBukkitEntity();
+      NPC npc = ((SkinnableEntity) tracker).getNPC();
+      if (entityplayer.getBukkitEntity().canSee(player) && npc.isLaying()) {
+        Location bedLocation = tracker.getBukkitEntity().getLocation();
+        bedLocation.setY(0);
+        player.sendBlockChange(bedLocation, Material.BED_BLOCK, (byte) 0);
+        entityplayer.playerConnection
+          .sendPacket(new PacketPlayOutBed((EntityHuman) tracker, new BlockPosition(bedLocation.getBlockX(), bedLocation.getBlockY(), bedLocation.getBlockZ())));
+      }
+    }
   }
 }

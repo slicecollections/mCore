@@ -8,6 +8,8 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.libraries.npclib.NPCLibrary;
 import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPC;
 import tk.slicecollections.maxteer.libraries.npclib.npc.AbstractEntityController;
@@ -35,6 +37,7 @@ public class HumanController extends AbstractEntityController {
         NMS.removeFromPlayerList(handle.getBukkitEntity());
       }
     }, 20);
+    handle.getBukkitEntity().setMetadata("NPC", new FixedMetadataValue(Core.getInstance(), true));
     handle.getBukkitEntity().setSleepingIgnored(true);
 
     return handle.getBukkitEntity();

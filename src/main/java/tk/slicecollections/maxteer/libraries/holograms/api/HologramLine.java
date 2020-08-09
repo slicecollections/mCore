@@ -1,8 +1,10 @@
 package tk.slicecollections.maxteer.libraries.holograms.api;
 
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.Location;
 import tk.slicecollections.maxteer.nms.NMS;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
+import tk.slicecollections.maxteer.nms.interfaces.entity.IItem;
 import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
@@ -14,7 +16,9 @@ public class HologramLine {
   private Location location;
   private IArmorStand armor;
   private ISlime slime;
+  private IItem item;
   private TouchHandler touch;
+  private PickupHandler pickup;
   private String line;
   private Hologram hologram;
 
@@ -40,9 +44,13 @@ public class HologramLine {
       this.armor.killEntity();
       this.armor = null;
     }
-    if (slime != null) {
+    if (this.slime != null) {
       this.slime.killEntity();
       this.slime = null;
+    }
+    if (this.item != null) {
+      this.item.killEntity();
+      this.item = null;
     }
   }
 
@@ -62,6 +70,25 @@ public class HologramLine {
       }
 
       this.touch = touch;
+    }
+  }
+
+  public void setItem(ItemStack item, PickupHandler pickup) {
+    if (pickup == null) {
+      this.item.killEntity();
+      this.item = null;
+      this.pickup = null;
+      return;
+    }
+
+    if (armor != null) {
+      this.item = this.item == null ? NMS.createItem(location, item, this) : this.item;
+
+      if (this.item != null) {
+        this.item.setPassengerOf(this.armor.getEntity());
+      }
+
+      this.pickup = pickup;
     }
   }
 
@@ -107,6 +134,10 @@ public class HologramLine {
 
   public TouchHandler getTouchHandler() {
     return this.touch;
+  }
+
+  public PickupHandler getPickupHandler() {
+    return this.pickup;
   }
 
   public String getLine() {

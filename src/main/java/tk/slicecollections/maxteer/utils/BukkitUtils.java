@@ -12,15 +12,14 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import tk.slicecollections.maxteer.reflection.Accessors;
 import tk.slicecollections.maxteer.reflection.MinecraftReflection;
+import tk.slicecollections.maxteer.reflection.acessors.ConstructorAccessor;
 import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.reflection.acessors.MethodAccessor;
 import tk.slicecollections.maxteer.utils.enums.EnumMaterial;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Float.parseFloat;
@@ -48,6 +47,37 @@ public class BukkitUtils {
     }
     GET_PROFILE = Accessors.getMethod(MinecraftReflection.getCraftBukkitClass("entity.CraftPlayer"), GameProfile.class, 0);
     SKULL_META_PROFILE = Accessors.getField(MinecraftReflection.getCraftBukkitClass("inventory.CraftMetaSkull"), "profile", GameProfile.class);
+  }
+
+  private static Map<Class<?>, MethodAccessor> getHandleCache = new HashMap<>();
+
+  public static Object getHandle(Object target) {
+    try {
+      Class<?> clazz = target.getClass();
+      MethodAccessor accessor = getHandleCache.get(clazz);
+      if (accessor == null) {
+        accessor = Accessors.getMethod(clazz, "getHandle");
+        getHandleCache.put(clazz, accessor);
+      }
+
+      return accessor.invoke(target);
+    } catch (Exception ex) {
+      throw new IllegalArgumentException("Cannot find method getHandle() for " + target + ".");
+    }
+  }
+
+  public static void openBook(Player player, ItemStack book) {
+    Object entityPlayer = BukkitUtils.getHandle(player);
+
+    ItemStack old = player.getInventory().getItemInHand();
+    try {
+      player.getInventory().setItemInHand(book);
+      Accessors.getMethod(entityPlayer.getClass(), "openBook").invoke(entityPlayer, BukkitUtils.asNMSCopy(book));
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    player.getInventory().setItemInHand(old);
+    player.updateInventory();
   }
 
   /**
@@ -325,6 +355,47 @@ public class BukkitUtils {
     meta.addEnchant(Enchantment.LURE, 1, true);
     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
     item.setItemMeta(meta);
+  }
+
+  private static Class<?> NBTagList = MinecraftReflection.getMinecraftClass("NBTTagList");
+  private static Class<?> NBTagString = MinecraftReflection.getMinecraftClass("NBTTagString");
+  private static ConstructorAccessor<?> constructorTagList = new ConstructorAccessor<>(NBTagList.getConstructors()[0]);
+  private static ConstructorAccessor<?> constructorTagString = new ConstructorAccessor<>(NBTagString.getConstructors()[1]);
+  private static MethodAccessor getTag = Accessors.getMethod(MinecraftReflection.getItemStackClass(), "getTag");
+  private static MethodAccessor setCompound = Accessors.getMethod(MinecraftReflection.getNBTTagCompoundClass(), "set", String.class, NBTagList.getSuperclass());
+  private static MethodAccessor addList = Accessors.getMethod(NBTagList, "add");
+  private static MethodAccessor asNMSCopy = Accessors.getMethod(MinecraftReflection.getCraftItemStackClass(), "asNMSCopy");
+  private static MethodAccessor asCraftMirror = Accessors.getMethod(MinecraftReflection.getCraftItemStackClass(), "asCraftMirror");
+
+  /**
+   * Transforma um {@link ItemStack} em ItemStack do NMS
+   *
+   * @param item Item para transformar.
+   * @return NMS ItemStack
+   */
+  public static Object asNMSCopy(ItemStack item) {
+    return asNMSCopy.invoke(null, item);
+  }
+
+  /**
+   * Transforma um ItemStack do NMS em {@link ItemStack}
+   *
+   * @param nmsItem Item NMS para transformar.
+   * @return ItemStack
+   */
+  public static ItemStack asCraftMirror(Object nmsItem) {
+    return (ItemStack) asCraftMirror.invoke(null, nmsItem);
+  }
+
+  public static ItemStack setNBTList(ItemStack item, String key, List<String> strings) {
+    Object nmsStack = asNMSCopy(item);
+    Object compound = getTag.invoke(nmsStack);
+    Object compoundList = constructorTagList.newInstance();
+    for (String string : strings) {
+      addList.invoke(compoundList, constructorTagString.newInstance(string));
+    }
+    setCompound.invoke(compound, key, compoundList);
+    return asCraftMirror(nmsStack);
   }
 
   /**

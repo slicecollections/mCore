@@ -72,7 +72,7 @@ public class Listeners implements Listener {
     LOGGER.run(Level.SEVERE, "Could not pass PlayerJoinEvent for ${n} v${v}", () -> {
       Player player = evt.getPlayer();
       if (player.hasPermission("mcore.admin")) {
-        if (!warnings.isEmpty()) {
+        /*if (!warnings.isEmpty()) {
           TextComponent component = new TextComponent("");
           for (BaseComponent components : TextComponent.fromLegacyText(
             " \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com os \"plugins m\", caso continue a usar estes plugins, não terá direito a suporte.\n \n §7Remova os seguintes plugins:")) {
@@ -89,7 +89,7 @@ public class Listeners implements Listener {
 
           player.spigot().sendMessage(component);
           EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
-        }
+        }*/
 
         if (!ServerItem.WARNINGS.isEmpty()) {
           TextComponent component = new TextComponent("");
@@ -146,9 +146,9 @@ public class Listeners implements Listener {
         profile.destroy();
       }
 
-      if (FakeManager.isBungeeSide()) {
-        FakeManager.removeFake(evt.getPlayer());
-      }
+      FakeManager.fakeNames.remove(evt.getPlayer().getName());
+      FakeManager.fakeRoles.remove(evt.getPlayer().getName());
+      FakeManager.fakeSkins.remove(evt.getPlayer().getName());
       DELAY_PLAYERS.remove(evt.getPlayer().getName());
       PROTECTION_LOBBY.remove(evt.getPlayer().getName().toLowerCase());
     });

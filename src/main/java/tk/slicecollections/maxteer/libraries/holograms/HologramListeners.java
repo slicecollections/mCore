@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -19,6 +20,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
+import tk.slicecollections.maxteer.nms.interfaces.entity.IItem;
 import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
 
 import java.util.HashMap;
@@ -35,6 +37,13 @@ public class HologramListeners implements Listener {
 
   public HologramListeners() {
     this.plugin = HologramLibrary.getPlugin();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onItemSpawn(ItemSpawnEvent evt) {
+    if (evt.getEntity() instanceof IItem) {
+      evt.setCancelled(false);
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

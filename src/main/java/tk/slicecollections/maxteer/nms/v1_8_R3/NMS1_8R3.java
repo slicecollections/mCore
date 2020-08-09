@@ -22,6 +22,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.inventory.ItemStack;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.libraries.holograms.api.Hologram;
 import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
@@ -31,8 +32,10 @@ import tk.slicecollections.maxteer.libraries.npclib.npc.ai.NPCHolder;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.interfaces.INMS;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
+import tk.slicecollections.maxteer.nms.interfaces.entity.IItem;
 import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityArmorStand;
+import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntityItem;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.EntitySlime;
 import tk.slicecollections.maxteer.nms.v1_8_R3.entity.*;
 import tk.slicecollections.maxteer.nms.v1_8_R3.utils.PlayerlistTrackerEntry;
@@ -66,6 +69,8 @@ public class NMS1_8R3 implements INMS {
     CLASS_TO_NAME.get(null).put(EntityArmorStand.class, "mCore-ArmorStand");
     CLASS_TO_ID.get(null).put(EntitySlime.class, 55);
     CLASS_TO_NAME.get(null).put(EntitySlime.class, "mCore-Slime");
+    CLASS_TO_ID.get(null).put(EntityItem.class, 1);
+    CLASS_TO_NAME.get(null).put(EntityItem.class, "mCore-Item");
     SET_TRACKERS = Accessors.getField(EntityTracker.class, "c", Set.class);
 
     FieldAccessor<PlayerMetadataStore> metadatastore = Accessors.getField(CraftServer.class, "playerMetadata", PlayerMetadataStore.class);
@@ -334,6 +339,23 @@ public class NMS1_8R3 implements INMS {
     }
 
     return add ? armor : null;
+  }
+
+  public IItem createItem(Location location, ItemStack item, HologramLine line) {
+    EntityItem eitem = new EntityItem(((CraftWorld) location.getWorld()).getHandle(), line);
+    eitem.setItemStack(item);
+    eitem.setLocation(location.getX(), location.getY(), location.getZ());
+
+    if (line != null) {
+      this.preHologram.put(eitem.getId(), line.getHologram());
+    }
+
+    boolean add = this.addEntity(eitem);
+    if (line != null) {
+      this.preHologram.remove(eitem.getId());
+    }
+
+    return add ? eitem : null;
   }
 
   public ISlime createSlime(Location location, HologramLine line) {

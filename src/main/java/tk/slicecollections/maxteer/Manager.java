@@ -39,7 +39,7 @@ public class Manager {
       IS_FAKE = Accessors.getMethod(bungeeMain, "isFake", String.class);
       GET_CURRENT = Accessors.getMethod(bungeeMain, "getCurrent", String.class);
       GET_FAKE = Accessors.getMethod(bungeeMain, "getFake", String.class);
-      GET_FAKE_ROLE = Accessors.getMethod(bungeeMain, "getFakeRole");
+      GET_FAKE_ROLE = Accessors.getMethod(bungeeMain, "getRole", String.class);
       BUNGEE = true;
     } catch (ClassNotFoundException ignore) {
       try {
@@ -55,7 +55,7 @@ public class Manager {
         IS_FAKE = Accessors.getMethod(fakeManager, "isFake", String.class);
         GET_CURRENT = Accessors.getMethod(fakeManager, "getCurrent", String.class);
         GET_FAKE = Accessors.getMethod(fakeManager, "getFake", String.class);
-        GET_FAKE_ROLE = Accessors.getMethod(fakeManager, "getFakeRole");
+        GET_FAKE_ROLE = Accessors.getMethod(fakeManager, "getRole", String.class);
       } catch (ClassNotFoundException ex) {
         ex.printStackTrace();
       }
@@ -91,8 +91,8 @@ public class Manager {
     return (String) GET_FAKE.invoke(null, playerName);
   }
 
-  public static Role getFakeRole() {
-    return (Role) GET_FAKE_ROLE.invoke(null);
+  public static Role getFakeRole(String playerName) {
+    return (Role) GET_FAKE_ROLE.invoke(null, playerName);
   }
 
   public static boolean hasPermission(Object player, String permission) {

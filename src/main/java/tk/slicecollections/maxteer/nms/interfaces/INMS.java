@@ -1,5 +1,6 @@
 package tk.slicecollections.maxteer.nms.interfaces;
 
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -11,6 +12,7 @@ import tk.slicecollections.maxteer.libraries.holograms.api.HologramLine;
 import tk.slicecollections.maxteer.libraries.npclib.api.npc.NPCAnimation;
 import tk.slicecollections.maxteer.libraries.npclib.npc.skin.SkinnableEntity;
 import tk.slicecollections.maxteer.nms.interfaces.entity.IArmorStand;
+import tk.slicecollections.maxteer.nms.interfaces.entity.IItem;
 import tk.slicecollections.maxteer.nms.interfaces.entity.ISlime;
 
 import java.util.Collection;
@@ -21,6 +23,8 @@ import java.util.Collection;
 public interface INMS {
 
   IArmorStand createArmorStand(Location location, String name, HologramLine line);
+
+  IItem createItem(Location location, ItemStack item, HologramLine line);
 
   ISlime createSlime(Location location, HologramLine line);
 

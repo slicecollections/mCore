@@ -37,9 +37,13 @@ public interface NPC {
 
   void setWalkingTo(Location location);
 
+  void setLaying(boolean laying);
+
   boolean isSpawned();
 
   boolean isProtected();
+
+  boolean isLaying();
 
   boolean isNavigating();
 

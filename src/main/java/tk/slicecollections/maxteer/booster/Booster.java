@@ -72,6 +72,7 @@ public class Booster {
       return false;
     }
 
+    profile.getBoostersContainer().removeBooster(BoosterType.NETWORK, booster);
     nb = new NetworkBooster(profile.getName(), booster.getMultiplier(), System.currentTimeMillis() + TimeUnit.HOURS.toMillis(booster.getHours()));
     Database.getInstance()
       .execute("UPDATE `mCoreNetworkBooster` SET `booster` = ?, `multiplier` = ?, `expires` = ? WHERE `id` = ?", nb.getBooster(), nb.getMultiplier(), nb.getExpires(), id);

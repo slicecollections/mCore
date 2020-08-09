@@ -1,5 +1,6 @@
 package tk.slicecollections.maxteer.bukkit;
 
+import com.google.common.collect.ImmutableList;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -25,7 +26,7 @@ public class BukkitPartyManager {
       CLEAN_PARTIES = new BukkitRunnable() {
         @Override
         public void run() {
-          BUKKIT_PARTIES.forEach(BukkitParty::update);
+          ImmutableList.copyOf(BUKKIT_PARTIES).forEach(BukkitParty::update);
         }
       }.runTaskTimer(Core.getInstance(), 0L, 40L);
     }

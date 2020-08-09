@@ -257,6 +257,13 @@ public class AbstractNPC implements NPC {
     this.walkingTo = location;
   }
 
+  private boolean laying;
+
+  @Override
+  public void setLaying(boolean laying) {
+    this.laying = true;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T extends NPCTrait> T getTrait(Class<T> traitClass) {
@@ -276,6 +283,11 @@ public class AbstractNPC implements NPC {
   @Override
   public boolean isNavigating() {
     return this.navigating;
+  }
+
+  @Override
+  public boolean isLaying() {
+    return this.laying;
   }
 
   @Override

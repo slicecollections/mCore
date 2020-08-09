@@ -101,7 +101,6 @@ public class SkyWarsAchievement extends Achievement {
     void give(Profile profile);
   }
 
-
   static class CoinsReward implements SkyWarsReward {
     private double amount;
 
@@ -114,7 +113,6 @@ public class SkyWarsAchievement extends Achievement {
       profile.getDataContainer("mCoreSkyWars", "coins").addDouble(this.amount);
     }
   }
-
 
   static class TitleReward implements SkyWarsReward {
     private String titleId;

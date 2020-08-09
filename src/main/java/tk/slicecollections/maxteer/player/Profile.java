@@ -46,8 +46,11 @@ public class Profile {
   public Profile(String name) {
     this.name = name;
     this.tableMap = Database.getInstance().load(name);
-    if (this.getDataContainer("mCoreProfile", "cash") == null) {
+    if (this.getDataContainer("mCoreProfile", "cash").get() == null) {
       this.getDataContainer("mCoreProfile", "cash").set(0L);
+    }
+    if (this.getDataContainer("mCoreTheBridge", "hotbar").get() == null) {
+      this.getDataContainer("mCoreTheBridge", "hotbar").set("{}");
     }
 
     this.getDataContainer("mCoreProfile", "lastlogin").set(System.currentTimeMillis());
