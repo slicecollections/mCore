@@ -146,6 +146,10 @@ public class FakeManager {
     return randoms;
   }
 
+  public static boolean isFakeRole(String roleName) {
+    return CONFIG.getStringList("fake.role").stream().anyMatch(role -> role.equalsIgnoreCase(roleName));
+  }
+
   private static Boolean bungeeSide;
 
   public static boolean isBungeeSide() {

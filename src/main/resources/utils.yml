@@ -5,11 +5,11 @@ bungeecord: false
 # /fake do mCore
 fake:
   # Roles que podem ser utilizadas com o /fake
-  # Não tem efeito no Bungeecord, a srole vão de acordo com as do servidor spigot em que o jogador está conectado.
+  # As role vão de acordo com as do servidor spigot em que o jogador está conectado.
+  # No bungeecord só é utilizado para restringir os cargos que podem ser utilizado pelo comando direto.
   role:
   - 'Membro'
   - 'VIP'
-  - 'VIP+'
   - 'MVP'
   - 'MVP+'
   # Nomes aleatórios do /fake

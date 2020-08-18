@@ -15,6 +15,7 @@ import java.util.Map;
 public class DataContainer {
 
   private Object value;
+  private boolean updated;
 
   public DataContainer(Object value) {
     this.value = value;
@@ -28,7 +29,14 @@ public class DataContainer {
   }
 
   public void set(Object value) {
+    if (!this.value.equals(value)) {
+      this.setUpdated(true);
+    }
     this.value = value;
+  }
+
+  public void setUpdated(boolean updated) {
+    this.updated = updated;
   }
 
   public void addInt(int amount) {
@@ -93,6 +101,10 @@ public class DataContainer {
     } catch (Exception ex) {
       throw new IllegalArgumentException("\"" + value + "\" is not a JsonArray: ", ex);
     }
+  }
+
+  public boolean isUpdated() {
+    return this.updated;
   }
 
   private Map<Class<? extends AbstractContainer>, AbstractContainer> containerMap = new HashMap<>();

@@ -80,20 +80,38 @@ public class MySQLDatabase extends Database {
 
   @Override
   public void save(String name, Map<String, Map<String, DataContainer>> tableMap) {
-    for (DataTable table : DataTable.listTables()) {
-      List<Object> values = tableMap.get(table.getInfo().name()).values().stream().map(DataContainer::get).collect(Collectors.toList());
-      values.add(name.toLowerCase());
-      this.execute(table.getInfo().update(), values.toArray());
-      values.clear();
-    }
+    this.save0(name, tableMap, true);
   }
 
   @Override
   public void saveSync(String name, Map<String, Map<String, DataContainer>> tableMap) {
+    this.save0(name, tableMap, false);
+  }
+
+  private void save0(String name, Map<String, Map<String, DataContainer>> tableMap, boolean async) {
     for (DataTable table : DataTable.listTables()) {
-      List<Object> values = tableMap.get(table.getInfo().name()).values().stream().map(DataContainer::get).collect(Collectors.toList());
+      Map<String, DataContainer> rows = tableMap.get(table.getInfo().name());
+      if (rows.values().stream().noneMatch(DataContainer::isUpdated)) {
+        continue;
+      }
+
+      List<Object> values = rows.values().stream().filter(DataContainer::isUpdated).map(DataContainer::get).collect(Collectors.toList());
+      StringBuilder query = new StringBuilder("UPDATE `" + table.getInfo().name() + "` SET ");
+      for (Map.Entry<String, DataContainer> collumn : rows.entrySet()) {
+        if (collumn.getValue().isUpdated()) {
+          collumn.getValue().setUpdated(false);
+          query.append("`").append(collumn.getKey()).append("` = ?, ");
+        }
+      }
+      query.deleteCharAt(query.length() - 1);
+      query.deleteCharAt(query.length() - 1);
+      query.append(" WHERE LOWER(`name`) = ?");
       values.add(name.toLowerCase());
-      this.update(table.getInfo().update(), values.toArray());
+      if (async) {
+        this.execute(query.toString(), values.toArray());
+      } else {
+        this.update(query.toString(), values.toArray());
+      }
       values.clear();
     }
   }

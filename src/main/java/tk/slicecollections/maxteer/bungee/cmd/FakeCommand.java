@@ -42,6 +42,11 @@ public class FakeCommand extends Commands {
     }
 
     String roleName = args[0];
+    if (!Bungee.isFakeRole(roleName)) {
+      Bungee.sendRole(player, "VILLAGER_NO");
+      return;
+    }
+
     if (Role.getRoleByName(roleName) == null) {
       Bungee.sendRole(player, "VILLAGER_NO");
       return;

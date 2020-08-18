@@ -15,10 +15,7 @@ import tk.slicecollections.maxteer.utils.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -92,6 +89,15 @@ public class Bungee extends Plugin {
   }
 
   private void setupRoles() {
+    try {
+      if (utils.get("fake.role") instanceof  String) {
+        utils.set("fake.role", Arrays.asList(utils.getString("fake.role")));
+        YamlConfiguration.getProvider(YamlConfiguration.class).save(utils, new File("plugins/mCore/utils.yml"));
+      }
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+
     for (String key : roles.getSection("roles").getKeys()) {
       String name = roles.getString("roles." + key + ".name");
       String prefix = roles.getString("roles." + key + ".prefix");
@@ -188,6 +194,10 @@ public class Bungee extends Plugin {
     }
 
     return randoms;
+  }
+
+  public static boolean isFakeRole(String roleName) {
+    return getInstance().getConfig().getStringList("fake.role").stream().anyMatch(role -> role.equalsIgnoreCase(roleName));
   }
 
   /**

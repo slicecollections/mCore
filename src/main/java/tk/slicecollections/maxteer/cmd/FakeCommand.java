@@ -55,6 +55,12 @@ public class FakeCommand extends Commands {
       }
 
       String roleName = args[0];
+      if (!FakeManager.isFakeRole(roleName)) {
+        EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
+        FakeManager.sendRole(player);
+        return;
+      }
+
       if (Role.getRoleByName(roleName) == null) {
         EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
         FakeManager.sendRole(player);
