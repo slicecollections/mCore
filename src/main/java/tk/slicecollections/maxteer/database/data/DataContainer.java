@@ -29,7 +29,7 @@ public class DataContainer {
   }
 
   public void set(Object value) {
-    if (!this.value.equals(value)) {
+    if (this.value == null || !this.value.equals(value)) {
       this.setUpdated(true);
     }
     this.value = value;
