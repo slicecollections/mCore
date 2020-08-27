@@ -40,31 +40,31 @@ public class DataContainer {
   }
 
   public void addInt(int amount) {
-    this.value = getAsInt() + amount;
+    this.set(getAsInt() + amount);
   }
 
   public void addLong(long amount) {
-    this.value = getAsLong() + amount;
+    this.set(getAsLong() + amount);
   }
 
   public void addDouble(double amount) {
-    this.value = getAsDouble() + amount;
+    this.set(getAsDouble() + amount);
   }
 
   public void removeInt(int amount) {
-    this.value = getAsInt() - amount;
+    this.set(getAsInt() - amount);
   }
 
   public void removeLong(long amount) {
-    this.value = getAsLong() - amount;
+    this.set(getAsLong() - amount);
   }
 
   public void removeDouble(double amount) {
-    this.value = getAsDouble() - amount;
+    this.set(getAsDouble() - amount);
   }
 
   public Object get() {
-    return value;
+    return this.value;
   }
 
   public int getAsInt() {
@@ -80,7 +80,7 @@ public class DataContainer {
   }
 
   public String getAsString() {
-    return value.toString();
+    return this.value.toString();
   }
 
   public boolean getAsBoolean() {

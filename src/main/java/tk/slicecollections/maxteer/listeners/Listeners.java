@@ -69,89 +69,66 @@ public class Listeners implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerJoin(PlayerJoinEvent evt) {
-    LOGGER.run(Level.SEVERE, "Could not pass PlayerJoinEvent for ${n} v${v}", () -> {
-      Player player = evt.getPlayer();
-      if (player.hasPermission("mcore.admin")) {
-        /*if (!warnings.isEmpty()) {
-          TextComponent component = new TextComponent("");
-          for (BaseComponent components : TextComponent.fromLegacyText(
-            " \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com os \"plugins m\", caso continue a usar estes plugins, não terá direito a suporte.\n \n §7Remova os seguintes plugins:")) {
+    Player player = evt.getPlayer();
+    if (player.hasPermission("mcore.admin")) {
+      if (!ServerItem.WARNINGS.isEmpty()) {
+        TextComponent component = new TextComponent("");
+        for (BaseComponent components : TextComponent.fromLegacyText(
+          " \n §6§lAVISO IMPORTANTE\n \n §7O sistema de servidores do mCore foi alterado nessa nova versão e, aparentemente você utiliza a versão antiga!\n §7O novo padrão de 'servernames' na servers.yml é 'IP:PORTA ; BungeeServerName' e você utiliza o antigo padrão 'BungeeServerName' nas seguintes entradas:")) {
+          component.addExtra(components);
+        }
+        for (String warning : ServerItem.WARNINGS) {
+          for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
             component.addExtra(components);
           }
-          for (String warning : warnings) {
-            for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
-              component.addExtra(components);
-            }
-          }
-          for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
-            component.addExtra(components);
-          }
-
-          player.spigot().sendMessage(component);
-          EnumSound.VILLAGER_NO.play(player, 1.0F, 1.0F);
-        }*/
-
-        if (!ServerItem.WARNINGS.isEmpty()) {
-          TextComponent component = new TextComponent("");
-          for (BaseComponent components : TextComponent.fromLegacyText(
-            " \n §6§lAVISO IMPORTANTE\n \n §7O sistema de servidores do mCore foi alterado nessa nova versão e, aparentemente você utiliza a versão antiga!\n §7O novo padrão de 'servernames' na servers.yml é 'IP:PORTA ; BungeeServerName' e você utiliza o antigo padrão 'BungeeServerName' nas seguintes entradas:")) {
-            component.addExtra(components);
-          }
-          for (String warning : ServerItem.WARNINGS) {
-            for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
-              component.addExtra(components);
-            }
-          }
-          for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
-            component.addExtra(components);
-          }
-
-          player.spigot().sendMessage(component);
-          EnumSound.ORB_PICKUP.play(player, 1.0F, 1.0F);
+        }
+        for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
+          component.addExtra(components);
         }
 
-        if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload) {
-          TextComponent component = new TextComponent("");
-          for (BaseComponent components : TextComponent
-            .fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
-            component.addExtra(components);
-          }
-          TextComponent click = new TextComponent("AQUI");
-          click.setColor(ChatColor.GREEN);
-          click.setBold(true);
-          click.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mc atualizar"));
-          click.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§7Clique aqui para atualizar o mCore.")));
-          component.addExtra(click);
-          for (BaseComponent components : TextComponent.fromLegacyText("§7.\n ")) {
-            component.addExtra(components);
-          }
-
-          player.spigot().sendMessage(component);
-          EnumSound.LEVEL_UP.play(player, 1.0F, 1.0F);
-        }
+        player.spigot().sendMessage(component);
+        EnumSound.ORB_PICKUP.play(player, 1.0F, 1.0F);
       }
-    });
+
+      if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload) {
+        TextComponent component = new TextComponent("");
+        for (BaseComponent components : TextComponent
+          .fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
+          component.addExtra(components);
+        }
+        TextComponent click = new TextComponent("AQUI");
+        click.setColor(ChatColor.GREEN);
+        click.setBold(true);
+        click.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mc atualizar"));
+        click.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§7Clique aqui para atualizar o mCore.")));
+        component.addExtra(click);
+        for (BaseComponent components : TextComponent.fromLegacyText("§7.\n ")) {
+          component.addExtra(components);
+        }
+
+        player.spigot().sendMessage(component);
+        EnumSound.LEVEL_UP.play(player, 1.0F, 1.0F);
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerQuit(PlayerQuitEvent evt) {
-    LOGGER.run(Level.SEVERE, "Could not pass PlayerQuitEvent for ${n} v${v}", () -> {
-      Profile profile = Profile.unloadProfile(evt.getPlayer().getName());
-      if (profile != null) {
-        if (profile.getGame() != null) {
-          profile.getGame().leave(profile, profile.getGame());
-        }
-        TitleManager.leaveServer(profile);
-        profile.save();
-        profile.destroy();
+    Profile profile = Profile.unloadProfile(evt.getPlayer().getName());
+    if (profile != null) {
+      if (profile.getGame() != null) {
+        profile.getGame().leave(profile, profile.getGame());
       }
+      TitleManager.leaveServer(profile);
+      profile.save();
+      profile.destroy();
+    }
 
-      FakeManager.fakeNames.remove(evt.getPlayer().getName());
-      FakeManager.fakeRoles.remove(evt.getPlayer().getName());
-      FakeManager.fakeSkins.remove(evt.getPlayer().getName());
-      DELAY_PLAYERS.remove(evt.getPlayer().getName());
-      PROTECTION_LOBBY.remove(evt.getPlayer().getName().toLowerCase());
-    });
+    FakeManager.fakeNames.remove(evt.getPlayer().getName());
+    FakeManager.fakeRoles.remove(evt.getPlayer().getName());
+    FakeManager.fakeSkins.remove(evt.getPlayer().getName());
+    DELAY_PLAYERS.remove(evt.getPlayer().getName());
+    PROTECTION_LOBBY.remove(evt.getPlayer().getName().toLowerCase());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

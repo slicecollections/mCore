@@ -6,7 +6,7 @@
 
     <groupId>tk.slicecollections.maxteer</groupId>
     <artifactId>mCore</artifactId>
-    <version>3.6</version>
+    <version>3.7</version>
 
     <properties>
         <main-bukkit>tk.slicecollections.maxteer.Core</main-bukkit>
@@ -91,7 +91,7 @@
                         </goals>
                         <configuration>
                             <outputFile>D:\Database\SliceCollections\${project.artifactId}.jar</outputFile>
-                            <!-- <outputFile>D:\Database\Servidores\bungee\plugins\${project.artifactId}.jar</outputFile> -->
+                            <!-- <outputFile>D:\Database\Servidores\mskywars\plugins\${project.artifactId}.jar</outputFile> -->
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.spigotmc:*</exclude>
