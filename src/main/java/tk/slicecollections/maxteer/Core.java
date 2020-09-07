@@ -2,6 +2,7 @@ package tk.slicecollections.maxteer;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import me.clip.placeholderapi.PlaceholderAPI;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -115,6 +116,12 @@ public class Core extends MPlugin {
       knownCommands.remove("bukkit:reload");
     } catch (ReflectiveOperationException ex) {
       getLogger().log(Level.SEVERE, "Cannot remove reload command: ", ex);
+    }
+
+    if (!PlaceholderAPIPlugin.getInstance().getDescription().getVersion().equals("2.10.5")) {
+      Bukkit.getConsoleSender().sendMessage(" \n §6§lAVISO IMPORTANTE\n \n §7Utilize a versão 2.10.5 do PlaceHolderAPI, você está utilizando a v" + PlaceholderAPIPlugin.getInstance().getDescription().getVersion() + "\n ");
+      System.exit(0);
+      return;
     }
 
     PlaceholderAPI.registerExpansion(new MCoreExpansion());

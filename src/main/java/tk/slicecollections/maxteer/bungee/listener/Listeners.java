@@ -38,7 +38,7 @@ public class Listeners implements Listener {
   private static final FieldAccessor<Map> COMMAND_MAP = Accessors.getField(PluginManager.class, "commandMap", Map.class);
 
   @EventHandler
-  public void onServerDisconnect(ServerDisconnectEvent evt) {
+  public void onPlayerDisconnect(PlayerDisconnectEvent evt) {
     TELL_CACHE.remove(evt.getPlayer().getName().toLowerCase());
     PROTECTION_CACHE.remove(evt.getPlayer().getName().toLowerCase());
     PROTECTION_LOBBY.remove(evt.getPlayer().getName().toLowerCase());
@@ -64,12 +64,13 @@ public class Listeners implements Listener {
           if (profile != null) {
             try {
               String[] data = in.readUTF().split(":");
-              if (profile.getProperties() != null) {
-                PROPERTY_BACKUP.put(player.getName().toLowerCase(), profile.getProperties());
-              }
+              PROPERTY_BACKUP.put(player.getName().toLowerCase(), profile.getProperties());
               this.modifyProperties(profile, data);
             } catch (Exception ex) {
-              profile.setProperties(PROPERTY_BACKUP.remove(player.getName().toLowerCase()));
+              LoginResult.Property[] properties = PROPERTY_BACKUP.remove(player.getName().toLowerCase());
+              if (properties != null) {
+                profile.setProperties(properties);
+              }
             }
           }
         }

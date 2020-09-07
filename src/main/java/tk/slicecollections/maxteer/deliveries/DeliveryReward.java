@@ -54,6 +54,7 @@ public class DeliveryReward {
     CASH(1),
     SkyWars_COINS(1),
     TheBridge_COINS(1),
+    Murder_COINS(1),
     PRIVATE_BOOSTER(3),
     NETWORK_BOOSTER(3);
 

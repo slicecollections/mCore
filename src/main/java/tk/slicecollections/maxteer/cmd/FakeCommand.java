@@ -10,6 +10,7 @@ import tk.slicecollections.maxteer.utils.enums.EnumSound;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static tk.slicecollections.maxteer.player.fake.FakeManager.ALEX;
@@ -79,13 +80,15 @@ public class FakeCommand extends Commands {
         FakeManager.sendSkin(player, roleName);
         return;
       }
-
-      String fakeName = FakeManager.getRandomNicks().stream().filter(FakeManager::isUsable).sorted().findAny().orElse(null);
+      
+      List<String> enabled = FakeManager.getRandomNicks().stream().filter(FakeManager::isUsable).collect(Collectors.toList());
+      String fakeName = enabled.isEmpty() ? null : enabled.get(ThreadLocalRandom.current().nextInt(enabled.size()));
       if (fakeName == null) {
         player.sendMessage(" \n §c§lALTERAR NICKNAME\n \n §cNenhum nickname está disponível para uso no momento.\n ");
         return;
       }
 
+      enabled.clear();
       FakeManager.applyFake(player, fakeName, roleName, skin.equalsIgnoreCase("steve") ? STEVE : ALEX);
     } else if (label.equalsIgnoreCase("faker")) {
       if (profile != null && profile.playingGame()) {

@@ -6,6 +6,10 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import tk.slicecollections.maxteer.bungee.Bungee;
 import tk.slicecollections.maxteer.player.role.Role;
 
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import static tk.slicecollections.maxteer.bungee.Bungee.ALEX;
 import static tk.slicecollections.maxteer.bungee.Bungee.STEVE;
 
@@ -63,12 +67,14 @@ public class FakeCommand extends Commands {
       return;
     }
 
-    String fakeName = Bungee.getRandomNicks().stream().filter(Bungee::isUsable).sorted().findAny().orElse(null);
+    List<String> enabled = Bungee.getRandomNicks().stream().filter(Bungee::isUsable).collect(Collectors.toList());
+    String fakeName = enabled.isEmpty() ? null : enabled.get(ThreadLocalRandom.current().nextInt(enabled.size()));
     if (fakeName == null) {
       player.sendMessage(TextComponent.fromLegacyText(" \n §c§lALTERAR NICKNAME\n \n §cNenhum nickname está disponível para uso no momento.\n "));
       return;
     }
 
+    enabled.clear();
     Bungee.applyFake(player, fakeName, roleName, skin.equalsIgnoreCase("steve") ? STEVE : ALEX);
   }
 }
