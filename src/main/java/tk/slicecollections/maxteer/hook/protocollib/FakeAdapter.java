@@ -36,6 +36,8 @@ public class FakeAdapter extends PacketAdapter {
       String command = packet.getStrings().read(0);
       if (command.startsWith("/")) {
         packet.getStrings().write(0, FakeManager.replaceNickedPlayers(packet.getStrings().read(0), false));
+      } else {
+        packet.getStrings().write(0, FakeManager.replaceNickedChanges(packet.getStrings().read(0)));
       }
     }
   }

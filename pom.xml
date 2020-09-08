@@ -91,7 +91,7 @@
                         </goals>
                         <configuration>
                             <outputFile>D:\Database\SliceCollections\${project.artifactId}.jar</outputFile>
-                            <!-- <outputFile>D:\Database\Servidores\bungee\plugins\${project.artifactId}.jar</outputFile> -->
+                            <!-- <outputFile>D:\Database\Servidores\2mx\plugins\${project.artifactId}.jar</outputFile> -->
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.spigotmc:*</exclude>

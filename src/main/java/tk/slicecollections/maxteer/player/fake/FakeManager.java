@@ -162,6 +162,19 @@ public class FakeManager {
 
   private static final Pattern REAL_PATTERN = Pattern.compile("(?i)mcorefakereal:\\w*");
 
+  public static String replaceNickedChanges(String original) {
+    String replaced = original;
+    for (String name : listNicked()) {
+      Matcher matcher = Pattern.compile("(?i)" + name).matcher(replaced);
+
+      while (matcher.find()) {
+        replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement("mcorefakereal:" + name));
+      }
+    }
+
+    return replaced;
+  }
+
   public static String replaceNickedPlayers(String original, boolean toFake) {
     String replaced = original;
     for (String name : listNicked()) {

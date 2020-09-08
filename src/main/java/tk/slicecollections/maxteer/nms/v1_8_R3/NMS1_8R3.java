@@ -471,16 +471,29 @@ public class NMS1_8R3 implements INMS {
       PlayerConnection con = epOn.playerConnection;
       if (players.equals(player)) {
         con.sendPacket(removeInfo);
-        con.sendPacket(addInfo);
-        con.sendPacket(slot);
-        ((CraftPlayer) players).updateScaledHealth();
-        epOn.triggerHealthUpdate();
-        if (players.isOp()) {
-          players.setOp(false);
-          players.setOp(true);
-        }
-        players.updateInventory();
-        Bukkit.getScheduler().runTask(Core.getInstance(), epOn::updateAbilities);
+
+        final boolean flying = player.isFlying();
+        final Location location = player.getLocation();
+        final int level = player.getLevel();
+        final float xp = player.getExp();
+        final double maxHealth = player.getMaxHealth();
+        final double health = player.getHealth();
+
+        Bukkit.getScheduler().runTaskLater(Core.getInstance(), () -> {
+          con.sendPacket(new PacketPlayOutRespawn(players.getWorld().getEnvironment().getId(), epOn.getWorld().getDifficulty(), epOn.getWorld().getWorldData().getType(),
+            epOn.playerInteractManager.getGameMode()));
+
+          player.setFlying(flying);
+          player.teleport(location);
+          player.updateInventory();
+          player.setLevel(level);
+          player.setExp(xp);
+          player.setMaxHealth(maxHealth);
+          player.setHealth(health);
+          epOn.updateAbilities();
+
+          con.sendPacket(addInfo);
+        }, 1L);
       } else {
         if (players.canSee(player) && players.getWorld().equals(player.getWorld())) {
           con.sendPacket(removeEntity);
