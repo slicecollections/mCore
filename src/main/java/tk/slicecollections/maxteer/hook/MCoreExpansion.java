@@ -114,6 +114,11 @@ public class MCoreExpansion extends PlaceholderExpansion {
         } else if (data.equals("quickestdetective") || data.equals("quickestkiller")) {
           return MURDER_FORMAT.format(profile.getStats(table, "cl" + data) * 1000);
         }
+      } else if (value.startsWith("assassins_")) {
+        String data = value.replace("assassins_", "");
+        if (data.equals("kills") || data.equals("thrownknifekills") || data.equals("wins")) {
+          return StringUtils.formatNumber(profile.getStats(table, "as" + data));
+        }
       } else if (value.equals("coins")) {
         return StringUtils.formatNumber(profile.getCoins(table));
       }

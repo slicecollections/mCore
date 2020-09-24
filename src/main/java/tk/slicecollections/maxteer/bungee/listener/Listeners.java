@@ -154,20 +154,8 @@ public class Listeners implements Listener {
       return TELL_CACHE.get(name);
     }
 
-    boolean canReceiveTell = true;
-    CachedRowSet rs = Database.getInstance().query("SELECT `preferences` FROM `mCoreProfile` WHERE LOWER(`name`) = ?", name);
-    if (rs != null) {
-      try {
-        canReceiveTell = ((JSONObject) new JSONParser().parse(rs.getString("preferences"))).get("pm").equals(0L);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-
-    if (Database.getInstance().exists(name) != null) {
-      TELL_CACHE.put(name, canReceiveTell);
-    }
-
+    boolean canReceiveTell = Database.getInstance().getPreference(name, "pm", true);
+    TELL_CACHE.put(name, canReceiveTell);
     return canReceiveTell;
   }
 
@@ -176,16 +164,7 @@ public class Listeners implements Listener {
       return PROTECTION_CACHE.get(name);
     }
 
-    boolean hasProtectionLobby = true;
-    CachedRowSet rs = Database.getInstance().query("SELECT `preferences` FROM `mCoreProfile` WHERE LOWER(`name`) = ?", name);
-    if (rs != null) {
-      try {
-        hasProtectionLobby = ((JSONObject) new JSONParser().parse(rs.getString("preferences"))).get("pl").equals(0L);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-
+    boolean hasProtectionLobby = Database.getInstance().getPreference(name, "pl", true);
     PROTECTION_CACHE.put(name, hasProtectionLobby);
     return hasProtectionLobby;
   }

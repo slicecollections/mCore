@@ -160,7 +160,7 @@ public class FakeManager {
     return bungeeSide;
   }
 
-  private static final Pattern REAL_PATTERN = Pattern.compile("(?i)mcorefakereal:\\w*");
+  private static final Pattern REAL_PATTERN = Pattern.compile("(?i)mcorefakereal:\\w*"), NOT_CHANGE_PATTERN = Pattern.compile("(?i)mcorenotchange:\\w*");
 
   public static String replaceNickedChanges(String original) {
     String replaced = original;
@@ -168,7 +168,7 @@ public class FakeManager {
       Matcher matcher = Pattern.compile("(?i)" + name).matcher(replaced);
 
       while (matcher.find()) {
-        replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement("mcorefakereal:" + name));
+        replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement("mcorenotchange:" + name));
       }
     }
 
@@ -177,9 +177,16 @@ public class FakeManager {
 
   public static String replaceNickedPlayers(String original, boolean toFake) {
     String replaced = original;
+    List<String> backup = new ArrayList<>();
     for (String name : listNicked()) {
-      Matcher matcher = Pattern.compile("(?i)" + (toFake ? name : getFake(name))).matcher(replaced);
+      Matcher matcher = NOT_CHANGE_PATTERN.matcher(replaced);
+      while (matcher.find()) {
+        String found = matcher.group();
+        backup.add(found.replace("mcorenotchange:", ""));
+        replaced = replaced.replaceFirst(Pattern.quote(found), Matcher.quoteReplacement("mcorenotchange:" + (backup.size() - 1)));
+      }
 
+      matcher = Pattern.compile("(?i)" + (toFake ? name : getFake(name))).matcher(replaced);
       while (matcher.find()) {
         replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(toFake ? getFake(name) : name));
       }
@@ -187,9 +194,18 @@ public class FakeManager {
 
     Matcher matcher = REAL_PATTERN.matcher(replaced);
     while (matcher.find()) {
-      replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(
-        fakeNames.entrySet().stream().filter(entry -> entry.getValue().equals(matcher.group().replace("mcorefakereal:", ""))).map(Map.Entry::getKey).findFirst().orElse("")));
+      String found = matcher.group();
+      replaced = replaced.replaceFirst(Pattern.quote(found), Matcher.quoteReplacement(
+        fakeNames.entrySet().stream().filter(entry -> entry.getValue().equals(found.replace("mcorefakereal:", ""))).map(Map.Entry::getKey).findFirst().orElse("")));
     }
+
+    matcher = NOT_CHANGE_PATTERN.matcher(replaced);
+    while (matcher.find()) {
+      String found = matcher.group();
+      replaced = replaced.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(backup.get(Integer.parseInt(found.replace("mcorenotchange:", "")))));
+    }
+
+    backup.clear();
     return replaced;
   }
 

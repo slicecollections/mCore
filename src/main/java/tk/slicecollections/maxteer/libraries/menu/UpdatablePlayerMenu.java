@@ -16,7 +16,7 @@ public abstract class UpdatablePlayerMenu extends UpdatableMenu implements Liste
   private BukkitTask task;
 
   public UpdatablePlayerMenu(Player player, String name) {
-    this(player, name, 21);
+    this(player, name, 3);
   }
 
   public UpdatablePlayerMenu(Player player, String name, int rows) {

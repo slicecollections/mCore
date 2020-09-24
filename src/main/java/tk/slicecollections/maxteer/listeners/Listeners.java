@@ -6,8 +6,11 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,7 +18,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.spigotmc.WatchdogThread;
 import tk.slicecollections.maxteer.Core;
+import tk.slicecollections.maxteer.Manager;
 import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.player.enums.PrivateMessages;
 import tk.slicecollections.maxteer.player.enums.ProtectionLobby;
@@ -28,13 +33,11 @@ import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.TitleManager;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
+import tk.slicecollections.maxteer.utils.StringUtils;
 import tk.slicecollections.maxteer.utils.enums.EnumSound;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-
-import static tk.slicecollections.maxteer.Core.warnings;
 
 /**
  * @author Maxter
@@ -54,17 +57,21 @@ public class Listeners implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent evt) {
-    if (evt.getResult() == PlayerPreLoginEvent.Result.ALLOWED) {
+    if (evt.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) {
       Profile.createOrLoadProfile(evt.getName());
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerLoginMonitor(PlayerLoginEvent evt) {
-    if (Profile.getProfile(evt.getPlayer().getName()) == null) {
+    Profile profile = Profile.getProfile(evt.getPlayer().getName());
+    if (profile == null) {
       evt.disallow(PlayerLoginEvent.Result.KICK_OTHER,
         " \n§cAparentemente o servidor não conseguiu carregar seu Perfil.\n \n§cIsso ocorre normalmente quando o servidor ainda está despreparado para receber logins, aguarde um pouco e tente novamente.");
+      return;
     }
+
+    profile.setPlayer(evt.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -92,8 +99,7 @@ public class Listeners implements Listener {
 
       if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload) {
         TextComponent component = new TextComponent("");
-        for (BaseComponent components : TextComponent
-          .fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
+        for (BaseComponent components : TextComponent.fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
           component.addExtra(components);
         }
         TextComponent click = new TextComponent("AQUI");
@@ -112,6 +118,9 @@ public class Listeners implements Listener {
     }
   }
 
+  private static final FieldAccessor<WatchdogThread> RESTART_WATCHDOG = Accessors.getField(WatchdogThread.class, "instance", WatchdogThread.class);
+  private static final FieldAccessor<Boolean> RESTART_WATCHDOG_STOPPING = Accessors.getField(WatchdogThread.class, "stopping", boolean.class);
+
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerQuit(PlayerQuitEvent evt) {
     Profile profile = Profile.unloadProfile(evt.getPlayer().getName());
@@ -120,7 +129,14 @@ public class Listeners implements Listener {
         profile.getGame().leave(profile, profile.getGame());
       }
       TitleManager.leaveServer(profile);
-      profile.save();
+      if (!((CraftServer) Bukkit.getServer()).getHandle().getServer().isRunning() || RESTART_WATCHDOG_STOPPING.get(RESTART_WATCHDOG.get(null))) {
+        // server stopped - save SYNC
+        profile.saveSync();
+        Core.getInstance().getLogger().info("Saved " + profile.getName() + "!");
+      } else {
+        // server stop - save SYNC
+        profile.save();
+      }
       profile.destroy();
     }
 
@@ -141,27 +157,30 @@ public class Listeners implements Listener {
 
     String format = String.format(evt.getFormat(), player.getName(), evt.getMessage());
 
+    String current = Manager.getCurrent(player.getName());
+    Role role = Role.getPlayerRole(player);
     TextComponent component = new TextComponent("");
     for (BaseComponent components : TextComponent.fromLegacyText(format)) {
-      component.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + player.getName() + " "));
-      component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent
-        .fromLegacyText(Role.getColored(player.getName()) + "\n§fGrupo: " + Role.getPlayerRole(player).getName() + "\n \n§eClique para enviar uma mensagem privada.")));
+      component.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + current + " "));
+      component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+        TextComponent.fromLegacyText(StringUtils.getLastColor(role.getPrefix()) + current + "\n§fGrupo: " + role.getName() + "\n \n§eClique para enviar uma mensagem privada.")));
       component.addExtra(components);
     }
 
     evt.setCancelled(true);
     evt.getRecipients().forEach(players -> {
       if (players != null) {
-        Player.Spigot spigot = players.spigot();
-        if (spigot != null) {
-          spigot.sendMessage(component);
-        }
+        players.spigot().sendMessage(component);
       }
     });
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent evt) {
+    if (evt.isCancelled()) {
+      return;
+    }
+
     Player player = evt.getPlayer();
     Profile profile = Profile.getProfile(player.getName());
 
@@ -203,6 +222,15 @@ public class Listeners implements Listener {
           evt.setCancelled(true);
           button.getAction().execute(profile);
         }
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent evt) {
+    if (evt.getRightClicked() instanceof ArmorStand) {
+      if (evt.getPlayer().getGameMode() == GameMode.ADVENTURE) {
+        evt.setCancelled(true);
       }
     }
   }

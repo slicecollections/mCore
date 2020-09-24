@@ -121,6 +121,24 @@ public class NPCListeners implements Listener {
   }
 
   @EventHandler
+  public void onEntityDamage(EntityDamageByEntityEvent evt) {
+    if (NPCLibrary.isNPC(evt.getEntity())) {
+      NPC npc = NPCLibrary.getNPC(evt.getEntity());
+
+      if (evt.getDamager() instanceof Player) {
+        Player player = (Player) evt.getDamager();
+        long last = antiSpam.get(player) == null ? 0 : antiSpam.get(player) - System.currentTimeMillis();
+        if (last > 0) {
+          return;
+        }
+
+        antiSpam.put(player, System.currentTimeMillis() + 100);
+        Bukkit.getPluginManager().callEvent(new NPCLeftClickEvent(npc, player));
+      }
+    }
+  }
+
+  @EventHandler
   public void onPlayerInteractEntity(PlayerInteractEntityEvent evt) {
     if (NPCLibrary.isNPC(evt.getRightClicked())) {
       NPC npc = NPCLibrary.getNPC(evt.getRightClicked());
@@ -189,25 +207,6 @@ public class NPCListeners implements Listener {
 
           this.toRespawn.put(coord, new NPCInfo(npc, location));
         }
-      }
-    }
-  }
-
-  @EventHandler
-  public void onEntityDamage(EntityDamageByEntityEvent evt) {
-    if (NPCLibrary.isNPC(evt.getEntity())) {
-      NPC npc = NPCLibrary.getNPC(evt.getEntity());
-
-      evt.setCancelled(npc.isProtected());
-      if (evt.getDamager() instanceof Player) {
-        Player player = (Player) evt.getDamager();
-        long last = antiSpam.get(player) == null ? 0 : antiSpam.get(player) - System.currentTimeMillis();
-        if (last > 0) {
-          return;
-        }
-
-        antiSpam.put(player, System.currentTimeMillis() + 100);
-        Bukkit.getPluginManager().callEvent(new NPCLeftClickEvent(npc, player));
       }
     }
   }

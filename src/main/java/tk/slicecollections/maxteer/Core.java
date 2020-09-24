@@ -94,7 +94,7 @@ public class Core extends MPlugin {
 
     if (!warnings.isEmpty()) {
       CommandSender sender = Bukkit.getConsoleSender();
-      StringBuilder sb = new StringBuilder(" \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com o mCore e CIA. Você não poderá iniciar o servidor com os seguintes plugins:");
+      StringBuilder sb = new StringBuilder(" \n §6§lAVISO IMPORTANTE\n \n §7Aparentemente você utiliza plugins que conflitam com o mCore.\n §7Você não poderá iniciar o servidor com os seguintes plugins:");
       for (String warning : warnings) {
         sb.append("\n§f").append(warning);
       }
@@ -133,7 +133,9 @@ public class Core extends MPlugin {
       getConfig().getString("database.mysql.nome"),
       getConfig().getString("database.mysql.usuario"),
       getConfig().getString("database.mysql.senha"),
-      getConfig().getBoolean("database.mysql.hikari",false)
+      getConfig().getBoolean("database.mysql.hikari",false),
+      getConfig().getBoolean("database.mysql.mariadb", false),
+      getConfig().getString("database.mongodb.url", "")
     );
 
     NPCLibrary.setupNPCs(this);
@@ -167,7 +169,15 @@ public class Core extends MPlugin {
   @Override
   public void disable() {
     if (validInit) {
-      Profile.listProfiles().forEach(Profile::saveSync);
+      Bukkit.getOnlinePlayers().forEach(player -> {
+        Profile profile = Profile.unloadProfile(player.getName());
+        if (profile != null) {
+          profile.saveSync();
+          this.getLogger().info("Saved " + profile.getName() + "!");
+          profile.destroy();
+        }
+      });
+      Database.getInstance().close();
     }
 
     File update = new File("plugins/mCore/update", "mCore.jar");

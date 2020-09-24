@@ -1,7 +1,14 @@
 package tk.slicecollections.maxteer.database;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import tk.slicecollections.maxteer.Manager;
+import tk.slicecollections.maxteer.booster.NetworkBooster;
+import tk.slicecollections.maxteer.database.cache.RoleCache;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
+import tk.slicecollections.maxteer.player.role.Role;
+import tk.slicecollections.maxteer.utils.StringUtils;
 
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetProvider;
@@ -23,27 +30,125 @@ public class MySQLDatabase extends Database {
   private String dbname;
   private String username;
   private String password;
+  private boolean mariadb;
 
   private Connection connection;
   private ExecutorService executor;
 
-  public MySQLDatabase(String host, String port, String dbname, String username, String password) {
+  public MySQLDatabase(String host, String port, String dbname, String username, String password, boolean mariadb) {
+    this(host, port, dbname, username, password, mariadb, false);
+  }
+
+  public MySQLDatabase(String host, String port, String dbname, String username, String password, boolean mariadb, boolean skipTables) {
     this.host = host;
     this.port = port;
     this.dbname = dbname;
     this.username = username;
     this.password = password;
+    this.mariadb = mariadb;
 
     this.openConnection();
     this.executor = Executors.newCachedThreadPool();
 
-    this.update(
-      "CREATE TABLE IF NOT EXISTS `mCoreNetworkBooster` (`id` VARCHAR(32), `booster` TEXT, `multiplier` DOUBLE, `expires` LONG, PRIMARY KEY(`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;");
+    if (skipTables) {
+      this.update(
+        "CREATE TABLE IF NOT EXISTS `mCoreNetworkBooster` (`id` VARCHAR(32), `booster` TEXT, `multiplier` DOUBLE, `expires` LONG, PRIMARY KEY(`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;");
 
-    DataTable.listTables().forEach(table -> {
-      this.update(table.getInfo().create());
-      table.init(this);
-    });
+      DataTable.listTables().forEach(table -> {
+        this.update(table.getInfo().create());
+        table.init(this);
+      });
+    }
+  }
+
+  @Override
+  public void setupBoosters() {
+    if (!Manager.BUNGEE) {
+      for (String mg : tk.slicecollections.maxteer.Core.minigames) {
+        if (query("SELECT * FROM `mCoreNetworkBooster` WHERE `id` = ?", mg) == null) {
+          execute("INSERT INTO `mCoreNetworkBooster` VALUES (?, ?, ?, ?)", mg, "Maxteer", 1.0, 0L);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void setBooster(String minigame, String booster, double multiplier, long expires) {
+    execute("UPDATE `mCoreNetworkBooster` SET `booster` = ?, `multiplier` = ?, `expires` = ? WHERE `id` = ?", booster, multiplier, expires, minigame);
+  }
+
+  @Override
+  public NetworkBooster getBooster(String minigame) {
+    try (CachedRowSet rs = query("SELECT * FROM `mCoreNetworkBooster` WHERE `id` = ?", minigame)) {
+      if (rs != null) {
+        String booster = rs.getString("booster");
+        double multiplier = rs.getDouble("multiplier");
+        long expires = rs.getLong("expires");
+        if (expires > System.currentTimeMillis()) {
+          rs.close();
+          return new NetworkBooster(booster, multiplier, expires);
+        }
+      }
+    } catch (SQLException ignored) {}
+
+    return null;
+  }
+
+  @Override
+  public String getRankAndName(String player) {
+    try (CachedRowSet rs = query("SELECT `name`, `role` FROM `mCoreProfile` WHERE LOWER(`name`) = ?", player.toLowerCase())) {
+      if (rs != null) {
+        String result = rs.getString("role") + " : " + rs.getString("name");
+        RoleCache.setCache(player, rs.getString("role"), rs.getString("name"));
+        return result;
+      }
+    } catch (SQLException ignored) {}
+    return null;
+  }
+
+  @Override
+  public boolean getPreference(String player, String id, boolean def) {
+    boolean preference = true;
+    try (CachedRowSet rs = query("SELECT `preferences` FROM `mCoreProfile` WHERE LOWER(`name`) = ?", player.toLowerCase())) {
+      if (rs != null) {
+        preference = ((JSONObject) new JSONParser().parse(rs.getString("preferences"))).get(id).equals(0L);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
+    return preference;
+  }
+
+  @Override
+  public List<String[]> getLeaderBoard(String table, String... columns) {
+    List<String[]> result = new ArrayList<>();
+    StringBuilder add = new StringBuilder(), select = new StringBuilder();
+    for (String column : columns) {
+      add.append("`").append(column).append("` + ");
+      select.append("`").append(column).append("`, ");
+    }
+
+    try (CachedRowSet rs = query("SELECT " + select.toString() + "`name` FROM `" + table + "` ORDER BY " + add.toString() + " 0 DESC LIMIT 10")) {
+      if (rs != null) {
+        rs.beforeFirst();
+        while (rs.next()) {
+          long count = 0;
+          for (String column : columns) {
+            count += rs.getLong(column);
+          }
+          result.add(new String[] {Role.getColored(rs.getString("name"), true), StringUtils.formatNumber(count)});
+        }
+      }
+    } catch (SQLException ignore) {}
+
+    return result;
+  }
+
+  @Override
+  public void close() {
+    this.executor.shutdownNow().forEach(Runnable::run);
+    this.closeConnection();
   }
 
   @Override
@@ -53,16 +158,15 @@ public class MySQLDatabase extends Database {
       Map<String, DataContainer> containerMap = new LinkedHashMap<>();
       tableMap.put(table.getInfo().name(), containerMap);
 
-      CachedRowSet rs = this.query(table.getInfo().select(), name.toLowerCase());
-      if (rs != null) {
-        try {
+      try (CachedRowSet rs = this.query(table.getInfo().select(), name.toLowerCase())) {
+        if (rs != null) {
           for (int collumn = 2; collumn <= rs.getMetaData().getColumnCount(); collumn++) {
             containerMap.put(rs.getMetaData().getColumnName(collumn), new DataContainer(rs.getObject(collumn)));
           }
-        } catch (SQLException ex) {
-          LOGGER.log(Level.SEVERE, "Nao foi possível carregar os dados \"" + table.getInfo().name() + "\" do perfil: ", ex);
+          continue;
         }
-
+      } catch (SQLException ex) {
+        LOGGER.log(Level.SEVERE, "Nao foi possível carregar os dados \"" + table.getInfo().name() + "\" do perfil: ", ex);
         continue;
       }
 
@@ -71,7 +175,7 @@ public class MySQLDatabase extends Database {
       List<Object> list = new ArrayList<>();
       list.add(name);
       list.addAll(containerMap.values().stream().map(DataContainer::get).collect(Collectors.toList()));
-      this.execute(table.getInfo().insert(), list.toArray(new Object[list.size()]));
+      this.execute(table.getInfo().insert(), list.toArray());
       list.clear();
     }
 
@@ -119,7 +223,7 @@ public class MySQLDatabase extends Database {
   @Override
   public String exists(String name) {
     try {
-      return this.query("SELECT * FROM `mCoreProfile` WHERE LOWER(`name`) = ?", name.toLowerCase()).getString("name");
+      return this.query("SELECT `name` FROM `mCoreProfile` WHERE LOWER(`name`) = ?", name.toLowerCase()).getString("name");
     } catch (Exception ex) {
       return null;
     }
@@ -131,17 +235,19 @@ public class MySQLDatabase extends Database {
       if (this.connection == null) {
         reconnected = false;
       }
-      this.connection = DriverManager
-        .getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbname + "?verifyServerCertificate=false&useSSL=false&useUnicode=yes&characterEncoding=UTF-8", username,
-          password);
+      Class.forName(this.mariadb ? "org.mariadb.jdbc.Driver" : "com.mysql.jdbc.Driver");
+      this.connection = DriverManager.getConnection((this.mariadb ?
+        "jdbc:mariadb://" :
+        "jdbc:mysql://") + host + ":" + port + "/" + dbname + "?verifyServerCertificate=false&useSSL=false&useUnicode=yes&characterEncoding=UTF-8", username, password);
       if (reconnected) {
         LOGGER.info("Reconectado ao MySQL!");
         return;
       }
 
       LOGGER.info("Conectado ao MySQL!");
-    } catch (SQLException ex) {
+    } catch (Exception ex) {
       LOGGER.log(Level.SEVERE, "Nao foi possivel se conectar ao MySQL: ", ex);
+      System.exit(0);
     }
   }
 

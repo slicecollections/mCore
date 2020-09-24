@@ -33,9 +33,7 @@ public class MinecraftVersion {
    * @param version A build do servidor.
    */
   public MinecraftVersion(String version) {
-    int[] numbers = new int[3];
-    numbers = parseVersion(version);
-
+    int[] numbers = parseVersion(version);
     this.major = numbers[0];
     this.minor = numbers[1];
     this.build = numbers[2];

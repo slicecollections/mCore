@@ -2,6 +2,7 @@ package tk.slicecollections.maxteer.player.role;
 
 import tk.slicecollections.maxteer.Manager;
 import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.database.cache.RoleCache;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
 import javax.sql.rowset.CachedRowSet;
@@ -101,19 +102,17 @@ public class Role {
       return prefix + name;
     }
 
-    CachedRowSet rs = Database.getInstance().query("SELECT `name`, `role` FROM `mCoreProfile` WHERE LOWER(`name`) = ?", name.toLowerCase());
+    String rs = RoleCache.isPresent(name) ? RoleCache.get(name) : Database.getInstance().getRankAndName(name);
     if (rs != null) {
-      try {
-        prefix = getRoleByName(rs.getString("role")).getPrefix();
-        if (onlyColor) {
-          prefix = StringUtils.getLastColor(prefix);
-        }
-        name = rs.getString("name");
-        if (!removeFake && Manager.isFake(name)) {
-          name = Manager.getFake(name);
-        }
-        return prefix + name;
-      } catch (SQLException ignored) {}
+      prefix = getRoleByName(rs.split(" : ")[0]).getPrefix();
+      if (onlyColor) {
+        prefix = StringUtils.getLastColor(prefix);
+      }
+      name = rs.split(" : ")[1];
+      if (!removeFake && Manager.isFake(name)) {
+        name = Manager.getFake(name);
+      }
+      return prefix + name;
     }
 
     return prefix + name;

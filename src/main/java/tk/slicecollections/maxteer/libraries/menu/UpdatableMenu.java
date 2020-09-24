@@ -14,7 +14,7 @@ public abstract class UpdatableMenu extends Menu implements Listener {
   private BukkitTask task;
 
   public UpdatableMenu(String name) {
-    this(name, 21);
+    this(name, 3);
   }
 
   public UpdatableMenu(String name, int rows) {

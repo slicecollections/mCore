@@ -1,9 +1,11 @@
 database:
- # Tipos de bancos de dados disponíveis atualmente: MySQL
+ # Tipos de bancos de dados disponíveis atualmente: MongoDB, MySQL
  tipo: 'MySQL'
  mysql:
   # Utilizar Hikari
   hikari: false
+  # Utilizar driver da MariaDB
+  mariadb: false
   # Host para acessar o MySQL
   host: 'localhost'
   # Porta para acessar o MySQL
@@ -14,3 +16,7 @@ database:
   usuario: 'root'
   # Senha de acesso ao MySQL
   senha: ''
+ mongodb:
+   # URL de acesso ao MongoDB
+   # https://docs.mongodb.com/manual/reference/connection-string/
+   url: ''

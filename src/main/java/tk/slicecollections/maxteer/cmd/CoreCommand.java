@@ -3,6 +3,7 @@ package tk.slicecollections.maxteer.cmd;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tk.slicecollections.maxteer.Core;
+import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
 
 /**
@@ -24,7 +25,7 @@ public class CoreCommand extends Commands {
       }
 
       if (args.length == 0) {
-        player.sendMessage(" \n§3/mc atualizar §f- §7Atualizar o mCore.\n ");
+        player.sendMessage(" \n§3/mc atualizar §f- §7Atualizar o mCore.\n§3/mc converter §f- §7Converter seu Banco de Dados.\n ");
         return;
       }
 
@@ -41,8 +42,11 @@ public class CoreCommand extends Commands {
         } else {
           player.sendMessage("§aO plugin já se encontra em sua última versão.");
         }
+      } else if (action.equalsIgnoreCase("converter")) {
+        player.sendMessage("§fBanco de Dados: " + Database.getInstance().getClass().getSimpleName().replace("Database", ""));
+        Database.getInstance().convertDatabase(player);
       } else {
-        player.sendMessage(" \n§3/mcore atualizar §f- §7Atualizar o mCore.\n ");
+        player.sendMessage(" \n§3/mc atualizar §f- §7Atualizar o mCore.\n§3/mc converter §f- §7Converter seu Banco de Dados.\n ");
       }
     } else {
       sender.sendMessage("§cApenas jogadores podem utilizar este comando.");

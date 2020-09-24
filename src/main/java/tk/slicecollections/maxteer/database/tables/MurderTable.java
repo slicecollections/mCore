@@ -1,6 +1,8 @@
 package tk.slicecollections.maxteer.database.tables;
 
 import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.database.HikariDatabase;
+import tk.slicecollections.maxteer.database.MySQLDatabase;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
 import tk.slicecollections.maxteer.database.data.interfaces.DataTableInfo;
@@ -19,7 +21,19 @@ import java.util.Map;
 public class MurderTable extends DataTable {
 
   @Override
-  public void init(Database database) {}
+  public void init(Database database) {
+    if (database instanceof MySQLDatabase) {
+      if (((MySQLDatabase) database).query("SHOW COLUMNS FROM `mCoreMurder` LIKE 'askills'") == null) {
+        ((MySQLDatabase) database).execute(
+          "ALTER TABLE `mCoreMurder` ADD `askills` LONG DEFAULT 0 AFTER `clchancekiller`, ADD `asthrownknifekills` LONG DEFAULT 0 AFTER `askills`, ADD `aswins` LONG DEFAULT 0 AFTER `asthrownknifekills`");
+      }
+    } else if (database instanceof HikariDatabase) {
+      if (((HikariDatabase) database).query("SHOW COLUMNS FROM `mCoreMurder` LIKE 'askills'") == null) {
+        ((HikariDatabase) database).execute(
+          "ALTER TABLE `mCoreMurder` ADD `askills` LONG DEFAULT 0 AFTER `clchancekiller`, ADD `asthrownknifekills` LONG DEFAULT 0 AFTER `askills`, ADD `aswins` LONG DEFAULT 0 AFTER `asthrownknifekills`");
+      }
+    }
+  }
 
   public Map<String, DataContainer> getDefaultValues() {
     Map<String, DataContainer> defaultValues = new LinkedHashMap<>();
@@ -34,6 +48,9 @@ public class MurderTable extends DataTable {
     defaultValues.put("clquickestkiller", new DataContainer(0L));
     defaultValues.put("clchancedetective", new DataContainer(1L));
     defaultValues.put("clchancekiller", new DataContainer(1L));
+    defaultValues.put("askills", new DataContainer(0L));
+    defaultValues.put("asthrownknifekills", new DataContainer(0L));
+    defaultValues.put("aswins", new DataContainer(0L));
     defaultValues.put("coins", new DataContainer(0.0D));
     defaultValues.put("lastmap", new DataContainer(0L));
     defaultValues.put("cosmetics", new DataContainer("{}"));

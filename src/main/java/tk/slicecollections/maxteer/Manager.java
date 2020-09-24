@@ -47,7 +47,7 @@ public class Manager {
         Class<?> spigot = Class.forName("org.bukkit.entity.Player$Spigot");
         Class<?> fakeManager = Class.forName("tk.slicecollections.maxteer.player.fake.FakeManager");
         GET_NAME = Accessors.getMethod(player, "getName");
-        GET_PLAYER = Accessors.getMethod(Class.forName("org.bukkit.Bukkit"), "getPlayer", String.class);
+        GET_PLAYER = Accessors.getMethod(Class.forName("tk.slicecollections.maxteer.player.Profile"), "findCached", String.class);
         HAS_PERMISSION = Accessors.getMethod(player, "hasPermission", String.class);
         SEND_MESSAGE = Accessors.getMethod(player, "sendMessage", String.class);
         GET_SPIGOT = Accessors.getMethod(player, "spigot");

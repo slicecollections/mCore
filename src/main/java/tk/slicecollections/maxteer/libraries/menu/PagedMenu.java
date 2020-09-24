@@ -24,7 +24,7 @@ public class PagedMenu {
   public String previousStack = "INK_SACK:8 : 1 : nome>&aPágina {page}", nextStack = "INK_SACK:10 : 1 : nome>&aPágina {page}";
 
   public PagedMenu(String name) {
-    this(name, 1);
+    this(name, 3);
   }
 
   public PagedMenu(String name, int rows) {

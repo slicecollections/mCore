@@ -13,7 +13,7 @@ public class PlayerMenu extends Menu implements Listener {
   protected Player player;
 
   public PlayerMenu(Player player, String title) {
-    this(player, title, 6);
+    this(player, title, 3);
   }
 
   public PlayerMenu(Player player, String title, int rows) {

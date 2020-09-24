@@ -32,6 +32,7 @@ public abstract class Party {
   private static final long MINUTES_UNTIL_EXPIRE_INVITE = 1L;
 
   private int slots;
+  private boolean isOpen;
   protected PartyPlayer leader;
   protected List<PartyPlayer> members;
   protected Map<String, Long> invitesMap;
@@ -44,6 +45,10 @@ public abstract class Party {
     this.members = new ArrayList<>();
     this.invitesMap = new ConcurrentHashMap<>();
     this.members.add(this.leader);
+  }
+
+  public void setIsOpen(boolean flag) {
+    this.isOpen = flag;
   }
 
   public void invite(Object target) {
@@ -171,6 +176,10 @@ public abstract class Party {
 
   public PartyPlayer getPlayer(String name) {
     return this.members.stream().filter(pp -> pp.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+  }
+
+  public boolean isOpen() {
+    return this.isOpen;
   }
 
   public boolean canJoin() {

@@ -3,19 +3,15 @@ package tk.slicecollections.maxteer.bungee.party;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import tk.slicecollections.maxteer.Manager;
 import tk.slicecollections.maxteer.party.Party;
 import tk.slicecollections.maxteer.party.PartyPlayer;
 import tk.slicecollections.maxteer.player.role.Role;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 import static tk.slicecollections.maxteer.party.PartyRole.LEADER;
 
@@ -46,7 +42,6 @@ public class BungeeParty extends Party {
   @Override
   public void join(String member) {
     super.join(member);
-    this.summonMember(member);
     this.sendData();
   }
 
@@ -77,37 +72,6 @@ public class BungeeParty extends Party {
 
   public void sendData(ServerInfo serverInfo) {
     this.sendData(null, null, Collections.singleton(serverInfo));
-  }
-
-  public void summonMember(String member) {
-    this.summonMembers(null, Collections.singleton(member));
-  }
-
-  public void summonMembers(ServerInfo serverInfo) {
-    this.summonMembers(serverInfo, this.members.stream().map(PartyPlayer::getName).collect(Collectors.toList()));
-  }
-
-  private void summonMembers(ServerInfo serverInfo, Collection<String> members) {
-    if (serverInfo == null) {
-      ProxiedPlayer leader = (ProxiedPlayer) Manager.getPlayer(this.getLeader());
-      serverInfo = leader != null && leader.getServer() != null ? leader.getServer().getInfo() : null;
-    }
-
-    if (serverInfo != null) {
-      String leader = Role.getPrefixed(this.getLeader());
-      ServerInfo finalServerInfo = serverInfo;
-      members.forEach(member -> {
-        if (isLeader(member)) {
-          return;
-        }
-
-        ProxiedPlayer player = (ProxiedPlayer) Manager.getPlayer(member);
-        if (player != null && (player.getServer() == null || !player.getServer().getInfo().getName().equals(finalServerInfo.getName()))) {
-          player.connect(finalServerInfo);
-          player.sendMessage(TextComponent.fromLegacyText(" \n" + leader + " §apuxou você para o servidor.\n "));
-        }
-      });
-    }
   }
 
   private void sendData() {

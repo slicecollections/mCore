@@ -1,6 +1,8 @@
 package tk.slicecollections.maxteer.database.tables;
 
 import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.database.HikariDatabase;
+import tk.slicecollections.maxteer.database.MySQLDatabase;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
 import tk.slicecollections.maxteer.database.data.interfaces.DataTableInfo;
@@ -22,9 +24,16 @@ public class SkyWarsTable extends DataTable {
   
   @Override
   public void init(Database database) {
-    if (database.query("SHOW COLUMNS FROM `mCoreSkyWars` LIKE 'lastmap'") == null) {
-      database.execute(
-        "ALTER TABLE `mCoreSkyWars` ADD `lastmap` LONG DEFAULT 0 AFTER `coins`, ADD `kitconfig` TEXT AFTER `selected`");
+    if (database instanceof MySQLDatabase) {
+      if (((MySQLDatabase) database).query("SHOW COLUMNS FROM `mCoreSkyWars` LIKE 'lastmap'") == null) {
+        ((MySQLDatabase) database).execute(
+          "ALTER TABLE `mCoreSkyWars` ADD `lastmap` LONG DEFAULT 0 AFTER `coins`, ADD `kitconfig` TEXT AFTER `selected`");
+      }
+    } else if (database instanceof HikariDatabase) {
+      if (((HikariDatabase) database).query("SHOW COLUMNS FROM `mCoreSkyWars` LIKE 'lastmap'") == null) {
+        ((HikariDatabase) database).execute(
+          "ALTER TABLE `mCoreSkyWars` ADD `lastmap` LONG DEFAULT 0 AFTER `coins`, ADD `kitconfig` TEXT AFTER `selected`");
+      }
     }
   }
   

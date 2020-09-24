@@ -13,7 +13,7 @@ public class PagedPlayerMenu extends PagedMenu implements Listener {
   protected Player player;
 
   public PagedPlayerMenu(Player player, String name) {
-    this(player, name, 1);
+    this(player, name, 3);
   }
 
   public PagedPlayerMenu(Player player, String name, int rows) {

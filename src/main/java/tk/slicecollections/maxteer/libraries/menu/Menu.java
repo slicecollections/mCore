@@ -19,11 +19,11 @@ public class Menu {
   private List<Integer> slots = new ArrayList<>();
 
   public Menu() {
-    this("", 1);
+    this("", 3);
   }
 
   public Menu(String title) {
-    this(title, 1);
+    this(title, 3);
   }
 
   public Menu(String title, int rows) {

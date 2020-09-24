@@ -1,6 +1,5 @@
 package tk.slicecollections.maxteer.booster;
 
-import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.player.Profile;
 
@@ -55,15 +54,10 @@ public class Booster {
     NETWORK
   }
 
-
   private static final Map<String, NetworkBooster> CACHE = new HashMap<>();
 
   public static void setupBoosters() {
-    for (String mg : Core.minigames) {
-      if (Database.getInstance().query("SELECT * FROM `mCoreNetworkBooster` WHERE `id` = ?", mg) == null) {
-        Database.getInstance().execute("INSERT INTO `mCoreNetworkBooster` VALUES (?, ?, ?, ?)", mg, "Maxteer", 1.0, 0L);
-      }
-    }
+    Database.getInstance().setupBoosters();
   }
 
   public static boolean setNetworkBooster(String id, Profile profile, Booster booster) {
@@ -74,8 +68,7 @@ public class Booster {
 
     profile.getBoostersContainer().removeBooster(BoosterType.NETWORK, booster);
     nb = new NetworkBooster(profile.getName(), booster.getMultiplier(), System.currentTimeMillis() + TimeUnit.HOURS.toMillis(booster.getHours()));
-    Database.getInstance()
-      .execute("UPDATE `mCoreNetworkBooster` SET `booster` = ?, `multiplier` = ?, `expires` = ? WHERE `id` = ?", nb.getBooster(), nb.getMultiplier(), nb.getExpires(), id);
+    Database.getInstance().setBooster(id, nb.getBooster(), nb.getMultiplier(), nb.getExpires());
     CACHE.put(id, nb);
     return true;
   }
@@ -92,17 +85,10 @@ public class Booster {
       CACHE.remove(id);
     }
 
-    CachedRowSet rs = Database.getInstance().query("SELECT * FROM `mCoreNetworkBooster` WHERE `id` = ?", id);
-    if (rs != null) {
-      try {
-        if (rs.getLong("expires") > System.currentTimeMillis()) {
-          nb = new NetworkBooster(rs.getString("booster"), rs.getDouble("multiplier"), rs.getLong("expires"));
-          CACHE.put(id, nb);
-          return nb;
-        }
-      } catch (SQLException ignored) {}
+    nb = Database.getInstance().getBooster(id);
+    if (nb != null) {
+      CACHE.put(id, nb);
     }
-
-    return null;
+    return nb;
   }
 }

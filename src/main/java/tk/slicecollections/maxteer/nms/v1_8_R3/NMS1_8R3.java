@@ -391,6 +391,8 @@ public class NMS1_8R3 implements INMS {
       e = ((EntityArmorStand) en).getLine();
     } else if (en instanceof EntitySlime) {
       e = ((EntitySlime) en).getLine();
+    } else if (en instanceof EntityItem) {
+      e = ((EntityItem) en).getLine();
     }
 
     return e != null ? e.getHologram() : null;

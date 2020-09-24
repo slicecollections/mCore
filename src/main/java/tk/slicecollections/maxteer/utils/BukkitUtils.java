@@ -15,7 +15,6 @@ import tk.slicecollections.maxteer.reflection.MinecraftReflection;
 import tk.slicecollections.maxteer.reflection.acessors.ConstructorAccessor;
 import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
 import tk.slicecollections.maxteer.reflection.acessors.MethodAccessor;
-import tk.slicecollections.maxteer.utils.enums.EnumMaterial;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -83,7 +82,7 @@ public class BukkitUtils {
   /**
    * Cria um {@link ItemStack} a partir de uma {@code String}.<br/>
    * Formato: {@code MATERIAL:DURABILIDADE : QUANTIDADE : tag>valor}<br/>
-   * Referência de Material: {@link EnumMaterial} (prioridade) e {@link Material}<br/>
+   * Referência de Material: {@link Material}<br/>
    * <br/>
    * Propriedades (TAGS) disponíveis:
    * <ul>
@@ -92,14 +91,13 @@ public class BukkitUtils {
    * <li>encantar>DAMAGE_ALL:1\nFIRE_ASPECT:1 - Encanta o Item.</li>
    * <li>pintar>{@link Color} ou pintar>r:g:b - Pinta os Itens: Armadura de Couro e Fogos de
    * Artifício.</li>
-   * <li>dono>Notch - Seta o dono de uma cabeça (Recomendado utilizar o
-   * {@link BukkitUtils#putProfileOnSkull(Player, ItemStack)}.</li>
+   * <li>dono>Notch - Seta o dono de uma cabeça (Recomendado skin>skinvalue}.</li>
    * <li>skin>skinvalue - Seta o valor da Skin através do {@link GameProfile} para cabeças
    * customizadas.</li>
    * <li>paginas>Linha1 pagina1\nLinha2 pagina1{pular}Linha1 pagina2\nLinha2 pagina2 - Seta as páginas
    * do livro. (Utilize {pular} para pular para outra página)</li>
    * <li>autor>&6Maxter - Seta o autor do livro.</li>
-   * <li>titulo>&6MCore - Seta o título do livro.</li>
+   * <li>titulo>&6mCore - Seta o título do livro.</li>
    * <li>efeito>{@link PotionEffectType}:nivel(começa do 0):ticks(20ticks =
    * 1segundo)\nINVISIBILITY:0:600 - Adiciona efeitos em poções.</li>
    * <li>esconder>{@link ItemFlag}\n{@link ItemFlag} ou esconder>tudo - Aplica ItemFlags (Adicionado
@@ -118,7 +116,7 @@ public class BukkitUtils {
     String[] split = item.split(" : ");
     String mat = split[0].split(":")[0];
 
-    ItemStack stack = new ItemStack(EnumMaterial.matchMaterial(mat.toUpperCase()), 1);
+    ItemStack stack = new ItemStack(Material.matchMaterial(mat), 1);
     if (split[0].split(":").length > 1) {
       stack.setDurability((short) Integer.parseInt(split[0].split(":")[1]));
     }
@@ -143,13 +141,13 @@ public class BukkitUtils {
         meta.setDisplayName(StringUtils.formatColors(opt.split(">")[1]));
       }
 
-      if (opt.startsWith("desc>")) {
+      else if (opt.startsWith("desc>")) {
         for (String lored : opt.split(">")[1].split("\n")) {
           lore.add(StringUtils.formatColors(lored));
         }
       }
 
-      if (opt.startsWith("encantar>")) {
+      else if (opt.startsWith("encantar>")) {
         for (String enchanted : opt.split(">")[1].split("\n")) {
           if (enchantment != null) {
             enchantment.addStoredEnchant(Enchantment.getByName(enchanted.split(":")[0]), Integer.parseInt(enchanted.split(":")[1]), true);
@@ -160,7 +158,7 @@ public class BukkitUtils {
         }
       }
 
-      if (opt.startsWith("pintar>") && (effect != null || armor != null)) {
+      else if (opt.startsWith("pintar>") && (effect != null || armor != null)) {
         for (String color : opt.split(">")[1].split("\n")) {
           if (color.split(":").length > 2) {
             if (armor != null) {
@@ -185,35 +183,35 @@ public class BukkitUtils {
         }
       }
 
-      if (opt.startsWith("dono>") && skull != null) {
+      else if (opt.startsWith("dono>") && skull != null) {
         skull.setOwner(opt.split(">")[1]);
       }
 
-      if (opt.startsWith("skin>") && skull != null) {
+      else if (opt.startsWith("skin>") && skull != null) {
         GameProfile gp = new GameProfile(UUID.randomUUID(), null);
         gp.getProperties().put("textures", new Property("textures", opt.split(">")[1]));
         SKULL_META_PROFILE.set(skull, gp);
       }
 
-      if (opt.startsWith("paginas>") && book != null) {
+      else if (opt.startsWith("paginas>") && book != null) {
         book.setPages(opt.split(">")[1].split("\\{pular}"));
       }
 
-      if (opt.startsWith("autor>") && book != null) {
+      else if (opt.startsWith("autor>") && book != null) {
         book.setAuthor(opt.split(">")[1]);
       }
 
-      if (opt.startsWith("titulo>") && book != null) {
+      else if (opt.startsWith("titulo>") && book != null) {
         book.setTitle(opt.split(">")[1]);
       }
 
-      if (opt.startsWith("efeito>") && potion != null) {
+      else if (opt.startsWith("efeito>") && potion != null) {
         for (String pe : opt.split(">")[1].split("\n")) {
           potion.addCustomEffect(new PotionEffect(PotionEffectType.getByName(pe.split(":")[0]), Integer.parseInt(pe.split(":")[2]), Integer.parseInt(pe.split(":")[1])), false);
         }
       }
 
-      if (opt.startsWith("esconder>")) {
+      else if (opt.startsWith("esconder>")) {
         String[] flags = opt.split(">")[1].split("\n");
         for (String flag : flags) {
           if (flag.equalsIgnoreCase("tudo")) {

@@ -15,7 +15,7 @@ public abstract class UpdatablePlayerPagedMenu extends PagedPlayerMenu implement
   private BukkitTask task;
 
   public UpdatablePlayerPagedMenu(Player player, String name) {
-    this(player, name, 1);
+    this(player, name, 3);
   }
 
   public UpdatablePlayerPagedMenu(Player player, String name, int rows) {

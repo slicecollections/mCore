@@ -14,7 +14,7 @@ public abstract class UpdatablePagedMenu extends PagedMenu implements Listener {
   private BukkitTask task;
 
   public UpdatablePagedMenu(String name) {
-    this(name, 21);
+    this(name, 3);
   }
 
   public UpdatablePagedMenu(String name, int rows) {

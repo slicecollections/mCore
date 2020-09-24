@@ -1,6 +1,5 @@
 package tk.slicecollections.maxteer.player;
 
-import com.google.common.collect.ImmutableList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -10,6 +9,7 @@ import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.booster.NetworkBooster;
 import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.database.MongoDBDatabase;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.container.*;
 import tk.slicecollections.maxteer.database.data.interfaces.AbstractContainer;
@@ -46,13 +46,6 @@ public class Profile {
   public Profile(String name) {
     this.name = name;
     this.tableMap = Database.getInstance().load(name);
-    if (this.getDataContainer("mCoreProfile", "cash").get() == null) {
-      this.getDataContainer("mCoreProfile", "cash").set(0L);
-    }
-    if (this.getDataContainer("mCoreTheBridge", "hotbar").get() == null) {
-      this.getDataContainer("mCoreTheBridge", "hotbar").set("{}");
-    }
-
     this.getDataContainer("mCoreProfile", "lastlogin").set(System.currentTimeMillis());
   }
 
@@ -75,6 +68,9 @@ public class Profile {
   }
 
   public void setScoreboard(MScoreboard scoreboard) {
+    if (this.scoreboard != null) {
+      this.scoreboard.destroy();
+    }
     this.scoreboard = scoreboard;
   }
 
@@ -210,6 +206,11 @@ public class Profile {
 
   private Player player;
 
+  public void setPlayer(Player player) {
+    this.player = player;
+    UUID_CACHE.put(this.name.toLowerCase(), player.getUniqueId());
+  }
+
   public Player getPlayer() {
     if (this.player == null) {
       this.player = this.name == null ? null : Bukkit.getPlayerExact(this.name);
@@ -224,10 +225,6 @@ public class Profile {
 
   @SuppressWarnings("unchecked")
   public <T extends Game<?>> T getGame(Class<T> gameClass) {
-    if (this.game != null && gameClass.isAssignableFrom(this.game.getClass())) {
-      return (T) this.game;
-    }
-
     return this.game != null && gameClass.isAssignableFrom(this.game.getClass()) ? (T) this.game : null;
   }
 
@@ -257,6 +254,24 @@ public class Profile {
 
   public void addStats(String table, long amount, String... keys) {
     for (String key : keys) {
+      if (key.startsWith("monthly")) {
+        if (!(Database.getInstance() instanceof MongoDBDatabase)) {
+          continue;
+        }
+
+        String month = this.getDataContainer(table, "month").getAsString();
+        String current = (Calendar.getInstance().get(Calendar.MONTH) + 1) + "/" + Calendar.getInstance().get(Calendar.YEAR);
+        if (!month.equals(current)) {
+          Map<String, DataContainer> containerMap = this.tableMap.get(table);
+          containerMap.keySet().forEach(k -> {
+            if (k.startsWith("monthly")) {
+              containerMap.get(k).set(0L);
+            }
+          });
+          containerMap.get("month").set(current);
+        }
+      }
+
       this.getDataContainer(table, key).addLong(amount);
     }
   }
@@ -373,6 +388,11 @@ public class Profile {
     return this.getDataContainer(table, key).getContainer(containerClass);
   }
 
+  public Map<String, Map<String, DataContainer>> getTableMap() {
+    return this.tableMap;
+  }
+
+  private static final Map<String, UUID> UUID_CACHE = new HashMap<>();
   private static final Map<String, Profile> PROFILES = new ConcurrentHashMap<>();
   private static final SimpleDateFormat COMPARE_SDF = new SimpleDateFormat("yyyy/MM/dd");
 
@@ -403,7 +423,13 @@ public class Profile {
   }
 
   public static Profile unloadProfile(String playerName) {
+    UUID_CACHE.remove(playerName.toLowerCase());
     return PROFILES.remove(playerName.toLowerCase());
+  }
+
+  public static Player findCached(String playerName) {
+    UUID uuid = UUID_CACHE.get(playerName.toLowerCase());
+    return uuid == null ? null : Bukkit.getPlayer(uuid);
   }
 
   public static boolean isOnline(String playerName) {
