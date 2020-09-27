@@ -474,6 +474,7 @@ public class NMS1_8R3 implements INMS {
       if (players.equals(player)) {
         con.sendPacket(removeInfo);
 
+        final boolean allow = player.getAllowFlight();
         final boolean flying = player.isFlying();
         final Location location = player.getLocation();
         final int level = player.getLevel();
@@ -485,7 +486,10 @@ public class NMS1_8R3 implements INMS {
           con.sendPacket(new PacketPlayOutRespawn(players.getWorld().getEnvironment().getId(), epOn.getWorld().getDifficulty(), epOn.getWorld().getWorldData().getType(),
             epOn.playerInteractManager.getGameMode()));
 
-          player.setFlying(flying);
+          player.setAllowFlight(allow);
+          if (flying) {
+            player.setFlying(allow);
+          }
           player.teleport(location);
           player.updateInventory();
           player.setLevel(level);

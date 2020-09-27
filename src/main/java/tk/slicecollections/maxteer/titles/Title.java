@@ -1,6 +1,10 @@
 package tk.slicecollections.maxteer.titles;
 
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 import org.bukkit.inventory.ItemStack;
+import tk.slicecollections.maxteer.database.Database;
+import tk.slicecollections.maxteer.database.MongoDBDatabase;
 import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.utils.BukkitUtils;
 import tk.slicecollections.maxteer.utils.StringUtils;
@@ -65,6 +69,18 @@ public class Title {
 
     TITLES.add(new Title("mmd", "§6Sherlock Holmes", "&8Pode ser desbloqueado através do\n&8Desafio \"Detetive\"&8."));
     TITLES.add(new Title("mmk", "§4Jef the Killer", "&8Pode ser desbloqueado através do\n&8Desafio \"Serial Killer\"&8."));
+
+    if (Database.getInstance() instanceof MongoDBDatabase) {
+      MongoDBDatabase database = ((MongoDBDatabase) Database.getInstance());
+
+      MongoCursor<Document> titles = database.getDatabase().getCollection("mCoreTitles").find().cursor();
+      while (titles.hasNext()) {
+        Document title = titles.next();
+        TITLES.add(new Title(title.getString("_id"), title.getString("name"), title.getString("description")));
+      }
+
+      titles.close();
+    }
   }
 
   public static Title getById(String id) {
