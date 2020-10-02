@@ -5,6 +5,7 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,6 +38,7 @@ public class MongoDBDatabase extends Database {
   private MongoDatabase database;
   private MongoCollection<Document> collection;
   private Collation collation;
+  private UpdateOptions updateOptions;
   private ExecutorService executor;
 
   private List<String> tables;
@@ -48,6 +50,7 @@ public class MongoDBDatabase extends Database {
     this.executor = Executors.newCachedThreadPool();
 
     this.collation = Collation.builder().locale("en_US").collationStrength(CollationStrength.SECONDARY).build();
+    this.updateOptions = new UpdateOptions().collation(this.collation);
     this.tables =
       DataTable.listTables().stream().map(DataTable::getInfo).map(DataTableInfo::name).filter(name -> !name.equalsIgnoreCase("mCoreProfile")).collect(Collectors.toList());
 
@@ -278,9 +281,9 @@ public class MongoDBDatabase extends Database {
     }
 
     if (async) {
-      this.executor.execute(() -> this.collection.updateOne(Filters.eq("_id", name), new Document("$set", save)));
+      this.executor.execute(() -> this.collection.updateOne(Filters.eq("_id", name), new Document("$set", save), this.updateOptions));
     } else {
-      this.collection.updateOne(Filters.eq("_id", name), new Document("$set", save));
+      this.collection.updateOne(Filters.eq("_id", name), new Document("$set", save), this.updateOptions);
     }
   }
 
