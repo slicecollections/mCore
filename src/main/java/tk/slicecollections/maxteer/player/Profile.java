@@ -9,7 +9,6 @@ import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.booster.Booster;
 import tk.slicecollections.maxteer.booster.NetworkBooster;
 import tk.slicecollections.maxteer.database.Database;
-import tk.slicecollections.maxteer.database.MongoDBDatabase;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.container.*;
 import tk.slicecollections.maxteer.database.data.interfaces.AbstractContainer;
@@ -257,24 +256,6 @@ public class Profile {
 
   public void addStats(String table, long amount, String... keys) {
     for (String key : keys) {
-      if (key.startsWith("monthly")) {
-        if (!(Database.getInstance() instanceof MongoDBDatabase)) {
-          continue;
-        }
-
-        String month = this.getDataContainer(table, "month").getAsString();
-        String current = (Calendar.getInstance().get(Calendar.MONTH) + 1) + "/" + Calendar.getInstance().get(Calendar.YEAR);
-        if (!month.equals(current)) {
-          Map<String, DataContainer> containerMap = this.tableMap.get(table);
-          containerMap.keySet().forEach(k -> {
-            if (k.startsWith("monthly")) {
-              containerMap.get(k).set(0L);
-            }
-          });
-          containerMap.get("month").set(current);
-        }
-      }
-
       this.getDataContainer(table, key).addLong(amount);
     }
   }
