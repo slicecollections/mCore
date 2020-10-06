@@ -56,7 +56,6 @@ public class ServerItem {
   public static final MConfig CONFIG = Core.getInstance().getConfig("servers");
   public static final List<Integer> DISABLED_SLOTS = CONFIG.getIntegerList("disabled-slots");
   public static final Map<String, Integer> SERVER_COUNT = new HashMap<>();
-  public static final List<String> WARNINGS = new ArrayList<>();
 
   public static void setupServers() {
     for (String key : CONFIG.getSection("items").getKeys(false)) {
@@ -64,7 +63,6 @@ public class ServerItem {
       SERVERS.add(si);
       CONFIG.getStringList("items." + key + ".servernames").forEach(server -> {
         if (server.split(" ; ").length < 2) {
-          WARNINGS.add(" - (" + key + ") " + server);
           return;
         }
 

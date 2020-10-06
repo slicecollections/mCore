@@ -35,7 +35,7 @@ public class NPCListeners implements Listener {
   private Plugin plugin;
   private SkinUpdateTracker updateTracker;
   private final Map<Player, Long> antiSpam;
-  private final ListMultimap<ChunkCoord, NPCInfo> toRespawn = ArrayListMultimap.create();
+  private final ListMultimap<ChunkCoord, NPC> toRespawn = ArrayListMultimap.create();
 
   NPCListeners() {
     this.plugin = NPCLibrary.getPlugin();
@@ -154,7 +154,7 @@ public class NPCListeners implements Listener {
 
   @EventHandler
   public void onNPCNeedsRespawn(NPCNeedsRespawnEvent evt) {
-    toRespawn.put(toCoord(evt.getNPC().getCurrentLocation()), new NPCInfo(evt.getNPC(), evt.getNPC().getCurrentLocation()));
+    toRespawn.put(toCoord(evt.getNPC().getCurrentLocation()), evt.getNPC());
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -205,7 +205,7 @@ public class NPCListeners implements Listener {
             return;
           }
 
-          this.toRespawn.put(coord, new NPCInfo(npc, location));
+          this.toRespawn.put(coord, npc);
         }
       }
     }
@@ -214,8 +214,10 @@ public class NPCListeners implements Listener {
   private void respawnAllFromCoord(ChunkCoord coord) {
     for (ChunkCoord c : toRespawn.asMap().keySet()) {
       if (c.equals(coord)) {
-        for (NPCInfo info : toRespawn.get(c)) {
-          info.npc.spawn(info.location);
+        for (NPC npc : toRespawn.get(c)) {
+          if (npc.getUUID() != null && !npc.isSpawned()) {
+            npc.spawn(npc.getCurrentLocation());
+          }
         }
 
         toRespawn.asMap().remove(c);
@@ -224,7 +226,7 @@ public class NPCListeners implements Listener {
   }
 
   private void storeForRespawn(NPC npc) {
-    toRespawn.put(toCoord(npc.getEntity().getLocation()), new NPCInfo(npc, npc.getEntity().getLocation()));
+    toRespawn.put(toCoord(npc.getCurrentLocation()), npc);
   }
 
   private ChunkCoord toCoord(Chunk chunk) {
@@ -233,16 +235,6 @@ public class NPCListeners implements Listener {
 
   private ChunkCoord toCoord(Location location) {
     return new ChunkCoord(location.getWorld().getName(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
-  }
-
-  private static class NPCInfo {
-    private NPC npc;
-    private Location location;
-
-    public NPCInfo(NPC npc, Location location) {
-      this.npc = npc;
-      this.location = location;
-    }
   }
 
 

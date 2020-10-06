@@ -30,7 +30,6 @@ import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.plugin.logger.MLogger;
 import tk.slicecollections.maxteer.reflection.Accessors;
 import tk.slicecollections.maxteer.reflection.acessors.FieldAccessor;
-import tk.slicecollections.maxteer.servers.ServerItem;
 import tk.slicecollections.maxteer.titles.TitleManager;
 import tk.slicecollections.maxteer.utils.SliceUpdater;
 import tk.slicecollections.maxteer.utils.StringUtils;
@@ -78,25 +77,6 @@ public class Listeners implements Listener {
   public void onPlayerJoin(PlayerJoinEvent evt) {
     Player player = evt.getPlayer();
     if (player.hasPermission("mcore.admin")) {
-      if (!ServerItem.WARNINGS.isEmpty()) {
-        TextComponent component = new TextComponent("");
-        for (BaseComponent components : TextComponent.fromLegacyText(
-          " \n §6§lAVISO IMPORTANTE\n \n §7O sistema de servidores do mCore foi alterado nessa nova versão e, aparentemente você utiliza a versão antiga!\n §7O novo padrão de 'servernames' na servers.yml é 'IP:PORTA ; BungeeServerName' e você utiliza o antigo padrão 'BungeeServerName' nas seguintes entradas:")) {
-          component.addExtra(components);
-        }
-        for (String warning : ServerItem.WARNINGS) {
-          for (BaseComponent components : TextComponent.fromLegacyText("\n§f" + warning)) {
-            component.addExtra(components);
-          }
-        }
-        for (BaseComponent components : TextComponent.fromLegacyText("\n ")) {
-          component.addExtra(components);
-        }
-
-        player.spigot().sendMessage(component);
-        EnumSound.ORB_PICKUP.play(player, 1.0F, 1.0F);
-      }
-
       if (SliceUpdater.UPDATER != null && SliceUpdater.UPDATER.canDownload) {
         TextComponent component = new TextComponent("");
         for (BaseComponent components : TextComponent.fromLegacyText(" \n §6§l[MCORE]\n \n §7O mCore possui uma nova atualização para ser feita, para prosseguir basta clicar ")) {
@@ -134,7 +114,7 @@ public class Listeners implements Listener {
         profile.saveSync();
         Core.getInstance().getLogger().info("Saved " + profile.getName() + "!");
       } else {
-        // server stop - save SYNC
+        // server running - save ASYNC
         profile.save();
       }
       profile.destroy();

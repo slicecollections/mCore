@@ -54,7 +54,11 @@ public class Profile {
     if (this.game != null) {
       TitleManager.leaveLobby(this);
     } else {
-      Bukkit.getScheduler().scheduleSyncDelayedTask(Core.getInstance(), () -> TitleManager.joinLobby(this), 5);
+      Bukkit.getScheduler().scheduleSyncDelayedTask(Core.getInstance(), () -> {
+      	if (this.isOnline() && !this.playingGame()) {
+      	  TitleManager.joinLobby(this);
+      	}
+      }, 5);
     }
   }
 
@@ -200,7 +204,7 @@ public class Profile {
   }
 
   public boolean isOnline() {
-    return isOnline(this.name);
+    return this.name != null && isOnline(this.name);
   }
 
   private Player player;
