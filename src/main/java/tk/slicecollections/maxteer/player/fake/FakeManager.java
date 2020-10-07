@@ -73,7 +73,7 @@ public class FakeManager {
   public static void sendRole(Player player) {
     ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) book.getItemMeta();
-    meta.setAuthor("whereismywaifu");
+    meta.setAuthor("Maxteer");
     meta.setTitle("Escolher cargo");
     book.setItemMeta(meta);
     book = BukkitUtils.setNBTList(book, "pages", Collections.singletonList(ComponentSerializer.toString(FAKE_ROLES)));
@@ -83,7 +83,7 @@ public class FakeManager {
   public static void sendSkin(Player player, String role) {
     ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) book.getItemMeta();
-    meta.setAuthor("whereismywaifu");
+    meta.setAuthor("Maxteer");
     meta.setTitle("Escolher cargo");
     book.setItemMeta(meta);
     book = BukkitUtils.setNBTList(book, "pages", Collections.singletonList(ComponentSerializer.toString(FAKE_SKINS).replace("{role}", role)));
