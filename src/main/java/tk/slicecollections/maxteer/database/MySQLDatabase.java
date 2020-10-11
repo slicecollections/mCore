@@ -50,7 +50,7 @@ public class MySQLDatabase extends Database {
     this.openConnection();
     this.executor = Executors.newCachedThreadPool();
 
-    if (skipTables) {
+    if (!skipTables) {
       this.update(
         "CREATE TABLE IF NOT EXISTS `mCoreNetworkBooster` (`id` VARCHAR(32), `booster` TEXT, `multiplier` DOUBLE, `expires` LONG, PRIMARY KEY(`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;");
 
