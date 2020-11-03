@@ -44,7 +44,15 @@ public class VirtualTeam {
   public void update() {
     Team team = this.instance.getScoreboard().getTeam(name);
     if (team == null) {
-      team = this.instance.getScoreboard().registerNewTeam(name);
+      try {
+        team = this.instance.getScoreboard().registerNewTeam(name);
+      } catch (Exception ignore) {
+        team = this.instance.getScoreboard().getTeam(name);
+      }
+    }
+
+    if (team == null) {
+      return;
     }
 
     team.setPrefix(this.prefix);

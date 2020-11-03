@@ -1,6 +1,7 @@
 package tk.slicecollections.maxteer.libraries.npclib;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -212,7 +213,7 @@ public class NPCListeners implements Listener {
   }
 
   private void respawnAllFromCoord(ChunkCoord coord) {
-    for (ChunkCoord c : toRespawn.asMap().keySet()) {
+    for (ChunkCoord c : ImmutableSet.copyOf(toRespawn.asMap().keySet())) {
       if (c.equals(coord)) {
         for (NPC npc : toRespawn.get(c)) {
           if (npc.getUUID() != null && !npc.isSpawned()) {

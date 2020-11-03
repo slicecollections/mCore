@@ -12,6 +12,7 @@ import tk.slicecollections.maxteer.database.Database;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.container.*;
 import tk.slicecollections.maxteer.database.data.interfaces.AbstractContainer;
+import tk.slicecollections.maxteer.database.exception.ProfileLoadException;
 import tk.slicecollections.maxteer.game.Game;
 import tk.slicecollections.maxteer.game.GameTeam;
 import tk.slicecollections.maxteer.hook.FriendsHook;
@@ -42,7 +43,7 @@ public class Profile {
   private Map<String, Long> lastHit = new HashMap<>();
   private Map<String, Map<String, DataContainer>> tableMap;
 
-  public Profile(String name) {
+  public Profile(String name) throws ProfileLoadException {
     this.name = name;
     this.tableMap = Database.getInstance().load(name);
     this.getDataContainer("mCoreProfile", "lastlogin").set(System.currentTimeMillis());
@@ -384,7 +385,7 @@ public class Profile {
   private static final Map<String, Profile> PROFILES = new ConcurrentHashMap<>();
   private static final SimpleDateFormat COMPARE_SDF = new SimpleDateFormat("yyyy/MM/dd");
 
-  public static Profile createOrLoadProfile(String playerName) {
+  public static Profile createOrLoadProfile(String playerName) throws ProfileLoadException {
     Profile profile = PROFILES.getOrDefault(playerName.toLowerCase(), null);
     if (profile == null) {
       profile = new Profile(playerName);
@@ -394,7 +395,7 @@ public class Profile {
     return profile;
   }
 
-  public static Profile loadIfExists(String playerName) {
+  public static Profile loadIfExists(String playerName) throws ProfileLoadException {
     Profile profile = PROFILES.getOrDefault(playerName.toLowerCase(), null);
     if (profile == null) {
       playerName = Database.getInstance().exists(playerName);

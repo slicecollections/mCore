@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.spigotmc.WatchdogThread;
 import tk.slicecollections.maxteer.Core;
 import tk.slicecollections.maxteer.Manager;
+import tk.slicecollections.maxteer.database.exception.ProfileLoadException;
 import tk.slicecollections.maxteer.player.Profile;
 import tk.slicecollections.maxteer.player.enums.PrivateMessages;
 import tk.slicecollections.maxteer.player.enums.ProtectionLobby;
@@ -37,6 +38,7 @@ import tk.slicecollections.maxteer.utils.enums.EnumSound;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * @author Maxter
@@ -57,7 +59,11 @@ public class Listeners implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent evt) {
     if (evt.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-      Profile.createOrLoadProfile(evt.getName());
+      try {
+        Profile.createOrLoadProfile(evt.getName());
+      } catch (ProfileLoadException ex) {
+        LOGGER.log(Level.SEVERE, "Nao foi possível carregar os dados do perfil \"" + evt.getName() + "\": ", ex);
+      }
     }
   }
 
@@ -167,23 +173,25 @@ public class Listeners implements Listener {
     if (profile != null) {
       String[] args = evt.getMessage().replace("/", "").split(" ");
 
-      String command = args[0];
-      if (COMMAND_MAP.get(SIMPLE_COMMAND_MAP).containsKey("lobby") && command.equals("lobby") && profile.getPreferencesContainer()
-        .getProtectionLobby() == ProtectionLobby.ATIVADO) {
-        long last = PROTECTION_LOBBY.getOrDefault(player.getName().toLowerCase(), 0L);
-        if (last > System.currentTimeMillis()) {
-          PROTECTION_LOBBY.remove(player.getName().toLowerCase());
-          return;
-        }
+      if (args.length > 0) {
+        String command = args[0];
+        if (COMMAND_MAP.get(SIMPLE_COMMAND_MAP).containsKey("lobby") && command.equals("lobby") && profile.getPreferencesContainer()
+          .getProtectionLobby() == ProtectionLobby.ATIVADO) {
+          long last = PROTECTION_LOBBY.getOrDefault(player.getName().toLowerCase(), 0L);
+          if (last > System.currentTimeMillis()) {
+            PROTECTION_LOBBY.remove(player.getName().toLowerCase());
+            return;
+          }
 
-        evt.setCancelled(true);
-        PROTECTION_LOBBY.put(player.getName().toLowerCase(), System.currentTimeMillis() + 3000);
-        player.sendMessage("§aVocê tem certeza? Utilize /lobby novamente para voltar ao lobby.");
-      } else if (COMMAND_MAP.get(SIMPLE_COMMAND_MAP).containsKey("tell") && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
-        profile = Profile.getProfile(args[1]);
-        if (profile != null && profile.getPreferencesContainer().getPrivateMessages() != PrivateMessages.TODOS) {
           evt.setCancelled(true);
-          player.sendMessage("§cEste usuário desativou as mensagens privadas.");
+          PROTECTION_LOBBY.put(player.getName().toLowerCase(), System.currentTimeMillis() + 3000);
+          player.sendMessage("§aVocê tem certeza? Utilize /lobby novamente para voltar ao lobby.");
+        } else if (COMMAND_MAP.get(SIMPLE_COMMAND_MAP).containsKey("tell") && args.length > 1 && command.equals("tell") && !args[1].equalsIgnoreCase(player.getName())) {
+          profile = Profile.getProfile(args[1]);
+          if (profile != null && profile.getPreferencesContainer().getPrivateMessages() != PrivateMessages.TODOS) {
+            evt.setCancelled(true);
+            player.sendMessage("§cEste usuário desativou as mensagens privadas.");
+          }
         }
       }
     }

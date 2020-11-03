@@ -59,7 +59,7 @@ public abstract class MScoreboard {
   }
 
   public MScoreboard add(int line, String name) {
-    if (line > 15 || line < 1) {
+    if (line > 15 || line < 1 || this.teams == null) {
       return this;
     }
 
@@ -72,11 +72,11 @@ public abstract class MScoreboard {
   }
 
   public MScoreboard remove(int line) {
-    if (line > 15 || line < 1) {
+    if (line > 15 || line < 1 || this.teams == null) {
       return this;
     }
 
-    VirtualTeam team = teams[line - 1];
+    VirtualTeam team = this.teams[line - 1];
     if (team != null) {
       team.destroy();
       this.teams[line - 1] = null;

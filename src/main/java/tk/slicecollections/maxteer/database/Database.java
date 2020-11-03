@@ -4,6 +4,7 @@ import tk.slicecollections.maxteer.Manager;
 import tk.slicecollections.maxteer.booster.NetworkBooster;
 import tk.slicecollections.maxteer.database.cache.RoleCache;
 import tk.slicecollections.maxteer.database.data.DataContainer;
+import tk.slicecollections.maxteer.database.exception.ProfileLoadException;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public abstract class Database {
 
   public abstract void close();
 
-  public abstract Map<String, Map<String, DataContainer>> load(String name);
+  public abstract Map<String, Map<String, DataContainer>> load(String name) throws ProfileLoadException;
 
   public abstract void save(String name, Map<String, Map<String, DataContainer>> tableMap);
 

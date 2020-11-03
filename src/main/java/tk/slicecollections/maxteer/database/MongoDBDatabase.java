@@ -15,6 +15,7 @@ import tk.slicecollections.maxteer.database.cache.RoleCache;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
 import tk.slicecollections.maxteer.database.data.interfaces.DataTableInfo;
+import tk.slicecollections.maxteer.database.exception.ProfileLoadException;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.reflection.Accessors;
 import tk.slicecollections.maxteer.reflection.acessors.MethodAccessor;
@@ -176,7 +177,7 @@ public class MongoDBDatabase extends Database {
   }
 
   @Override
-  public Map<String, Map<String, DataContainer>> load(String name) {
+  public Map<String, Map<String, DataContainer>> load(String name) throws ProfileLoadException {
     Map<String, Map<String, DataContainer>> tableMap = new HashMap<>();
 
     List<String> includes = new ArrayList<>();
@@ -191,8 +192,7 @@ public class MongoDBDatabase extends Database {
     try {
       document = this.executor.submit(() -> this.collection.find(new BasicDBObject("_id", name)).projection(fields(include(includes))).collation(this.collation).first()).get();
     } catch (InterruptedException | ExecutionException ex) {
-      LOGGER.log(Level.SEVERE, "Nao foi possível carregar os dados do perfil: ", ex);
-      return tableMap;
+      throw new ProfileLoadException(ex.getMessage());
     }
 
     if (document != null) {

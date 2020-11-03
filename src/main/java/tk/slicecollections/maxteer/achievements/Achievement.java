@@ -36,7 +36,7 @@ public abstract class Achievement {
   }
 
   public boolean canComplete(Profile profile) {
-    return !this.isCompleted(profile) && this.check(profile);
+    return profile.isOnline() && !this.isCompleted(profile) && this.check(profile);
   }
 
   public boolean isCompleted(Profile profile) {

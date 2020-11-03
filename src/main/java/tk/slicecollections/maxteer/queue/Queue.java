@@ -2,6 +2,7 @@ package tk.slicecollections.maxteer.queue;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -51,13 +52,19 @@ public class Queue {
             }
 
             if (this.send) {
-              this.current.player.closeInventory();
-              NMS.sendActionBar(this.current.player, "");
-              this.current.player.sendMessage("§aConectando...");
-              ByteArrayDataOutput out = ByteStreams.newDataOutput();
-              out.writeUTF("Connect");
-              out.writeUTF(this.current.server);
-              this.current.player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
+              final Player player = this.current.player;
+              final String server = this.current.server;
+              Bukkit.getScheduler().runTask(Core.getInstance(), () -> {
+                if (player.isOnline()) {
+                  player.closeInventory();
+                  NMS.sendActionBar(player, "");
+                  player.sendMessage("§aConectando...");
+                  ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                  out.writeUTF("Connect");
+                  out.writeUTF(server);
+                  player.sendPluginMessage(Core.getInstance(), "BungeeCord", out.toByteArray());
+                }
+              });
               players.remove(this.current);
               this.current.destroy();
               this.current = null;

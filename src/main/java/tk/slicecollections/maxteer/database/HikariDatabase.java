@@ -9,6 +9,7 @@ import tk.slicecollections.maxteer.booster.NetworkBooster;
 import tk.slicecollections.maxteer.database.cache.RoleCache;
 import tk.slicecollections.maxteer.database.data.DataContainer;
 import tk.slicecollections.maxteer.database.data.DataTable;
+import tk.slicecollections.maxteer.database.exception.ProfileLoadException;
 import tk.slicecollections.maxteer.player.role.Role;
 import tk.slicecollections.maxteer.utils.StringUtils;
 
@@ -52,6 +53,14 @@ public class HikariDatabase extends Database {
 
     DataTable.listTables().forEach(table -> {
       this.update(table.getInfo().create());
+      try (
+          Connection connection = getConnection();
+          PreparedStatement ps = connection.prepareStatement("ALTER TABLE `" + table.getInfo().name() + "` ADD INDEX `namex` (`name` DESC)")
+      ) {
+        ps.executeUpdate();
+      } catch (SQLException ignore) {
+        // Index já existe
+      }
       table.init(this);
     });
   }
@@ -147,7 +156,7 @@ public class HikariDatabase extends Database {
   }
 
   @Override
-  public Map<String, Map<String, DataContainer>> load(String name) {
+  public Map<String, Map<String, DataContainer>> load(String name) throws ProfileLoadException  {
     Map<String, Map<String, DataContainer>> tableMap = new HashMap<>();
     for (DataTable table : DataTable.listTables()) {
       Map<String, DataContainer> containerMap = new LinkedHashMap<>();
@@ -161,8 +170,7 @@ public class HikariDatabase extends Database {
           continue;
         }
       } catch (SQLException ex) {
-        LOGGER.log(Level.SEVERE, "Nao foi possível carregar os dados \"" + table.getInfo().name() + "\" do perfil: ", ex);
-        continue;
+        throw new ProfileLoadException(ex.getMessage());
       }
 
       containerMap = table.getDefaultValues();
